@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+**/node_modules/
+*/target/
+**/target/
+*.jar
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.pem
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+.springBeans
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Build
+dist/
+build/
+out/
+.next/
+
+# OS
+.DS_Store
+Thumbs.db
