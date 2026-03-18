@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { cn } from "@/lib/utils";
 import BrandText from "../ui/brandText";
+import { useMobileNav } from "@/context/MobileNavContext";
 
 const navigation = [
   { name: "Jobs", href: "/jobs", icon: Briefcase },
@@ -85,6 +86,12 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const prevPathnameRef = useRef(pathname);
+  const { setIsMobileNavOpen } = useMobileNav();
+
+  // Update context when mobile nav opens/closes
+  useEffect(() => {
+    setIsMobileNavOpen(isOpen);
+  }, [isOpen, setIsMobileNavOpen]);
 
   // Handle scroll effect
   useEffect(() => {
@@ -125,7 +132,7 @@ export function Header() {
         animate="visible"
         variants={headerVariants}
         className={cn(
-          "fixed top-0 w-full z-50 transition-all duration-300",
+          "fixed top-0 w-full max-w-screen overflow-hidden z-50 transition-all duration-300",
           scrolled
             ? "bg-background/80 backdrop-blur-md border-b shadow-sm"
             : "bg-background border-b",
@@ -166,7 +173,7 @@ export function Header() {
             {/* <BrandText /> */}
 
             {/* Desktop Navigation - Center */}
-            <div className="hidden md:flex items-center justify-center flex-1 space-x-1">
+            <div className="hidden md:flex items-center justify-end mr-4 flex-1 space-x-1">
               {navigation.map((item) => {
                 const isActive =
                   pathname === item.href ||
@@ -278,109 +285,117 @@ export function Header() {
       </motion.header>
 
       {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            <motion.div
-              variants={overlayVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
-              onClick={() => setIsOpen(false)}
-            />
+      <div className="max-w-screen w-full h-full max-h-screen overflow-hidden">
+        <AnimatePresence>
+          {isOpen && (
+            <>
+              <motion.div
+                variants={overlayVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="fixed inset-0 bg-background/90 backdrop-blur-sm z-40 md:hidden"
+                onClick={() => setIsOpen(false)}
+              />
 
-            <motion.div
-              variants={mobileMenuVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="fixed top-16 right-0 bottom-0 w-full max-w-sm bg-background border-l shadow-xl z-40 md:hidden overflow-y-auto"
-            >
-              <div className="p-6 space-y-6 flex-col h-full flex justify-between">
-                {/* Navigation Links */}
-                <div className="space-y-2">
-                  {navigation.map((item, index) => {
-                    const isActive =
-                      pathname === item.href ||
-                      pathname.startsWith(`${item.href}/`);
+              <motion.div
+                variants={mobileMenuVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="fixed top-16 right-0 bottom-0 w-full border-l shadow-xl z-40 md:hidden"
+              >
+                <div className="p-6 space-y-6 flex-col h-full flex justify-between">
+                  {/* Navigation Links */}
+                  <div className="space-y-2">
+                    {navigation.map((item, index) => {
+                      const isActive =
+                        pathname === item.href ||
+                        pathname.startsWith(`${item.href}/`);
 
-                    return (
-                      <motion.div
-                        key={item.name}
-                        custom={index}
-                        variants={mobileItemVariants}
-                        initial="hidden"
-                        animate="visible"
-                      >
-                        <Link
-                          href={item.href}
-                          onClick={() => setIsOpen(false)}
-                          className={cn(
-                            "flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",
-                            isActive
-                              ? "bg-primary/10 text-primary"
-                              : "text-muted-foreground bg-primary/5 hover:bg-muted",
-                          )}
+                      return (
+                        <motion.div
+                          key={item.name}
+                          custom={index}
+                          variants={mobileItemVariants}
+                          initial="hidden"
+                          animate="visible"
                         >
-                          <item.icon className="h-5 w-5" />
-                          <span className="font-medium">
-                            <span className="text-[14px] opacity-100 font-bold">
-                              ගොඩයන
-                            </span>{" "}
-                            &nbsp;
-                            {item.name}
-                          </span>
-                          {isActive && (
-                            <motion.div
-                              layoutId="mobile-active"
-                              className="ml-auto w-1.5 h-1.5 bg-primary rounded-full"
-                            />
-                          )}
-                        </Link>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-                <div>
-                  {/* Divider */}
-                  <div className="border-t border-border pb-8" />
-
-                  {/* Mobile Auth Buttons */}
-                  <div className="gap-4 pb-4 flex flex-col">
-                    <Link href="/auth/login" onClick={() => setIsOpen(false)}>
-                      <motion.div whileTap={{ scale: 0.95 }} className="w-full">
-                        <Button variant="outline" className="w-full">
-                          Login
-                        </Button>
-                      </motion.div>
-                    </Link>
-
-                    <Link
-                      href="/company/post-job"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <motion.div whileTap={{ scale: 0.95 }} className="w-full">
-                        <Button className="w-full bg-primary text-background">
-                          Post a Job
-                        </Button>
-                      </motion.div>
-                    </Link>
+                          <Link
+                            href={item.href}
+                            onClick={() => setIsOpen(false)}
+                            className={cn(
+                              "flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",
+                              isActive
+                                ? "bg-primary/10 text-primary"
+                                : "text-muted-foreground bg-primary/5 hover:bg-muted",
+                            )}
+                          >
+                            <item.icon className="h-5 w-5" />
+                            <span className="font-medium">
+                              <span className="text-[14px] opacity-100 font-bold">
+                                ගොඩයන
+                              </span>{" "}
+                              &nbsp;
+                              {item.name}
+                            </span>
+                            {isActive && (
+                              <motion.div
+                                layoutId="mobile-active"
+                                className="ml-auto w-1.5 h-1.5 bg-primary rounded-full"
+                              />
+                            )}
+                          </Link>
+                        </motion.div>
+                      );
+                    })}
                   </div>
+                  <div>
+                    {/* Divider */}
+                    <div className="border-t border-border pb-8" />
 
-                  {/* Quick Info */}
-                  <div className="pt-4 text-sm text-muted-foreground">
-                    <p className="text-center">
-                      Sri Lanka&apos;s leading platform for global opportunities
-                    </p>
+                    {/* Mobile Auth Buttons */}
+                    <div className="gap-4 pb-4 flex flex-col">
+                      <Link href="/auth/login" onClick={() => setIsOpen(false)}>
+                        <motion.div
+                          whileTap={{ scale: 0.95 }}
+                          className="w-full"
+                        >
+                          <Button variant="outline" className="w-full">
+                            Login
+                          </Button>
+                        </motion.div>
+                      </Link>
+
+                      <Link
+                        href="/company/post-job"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <motion.div
+                          whileTap={{ scale: 0.95 }}
+                          className="w-full"
+                        >
+                          <Button className="w-full bg-primary text-background">
+                            Post a Job
+                          </Button>
+                        </motion.div>
+                      </Link>
+                    </div>
+
+                    {/* Quick Info */}
+                    <div className="pt-4 text-sm text-muted-foreground">
+                      <p className="text-center">
+                        Sri Lanka&apos;s leading platform for global
+                        opportunities
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
       {/* Spacer to prevent content from hiding under fixed header */}
       <div className="h-16 md:h-20" />
     </>

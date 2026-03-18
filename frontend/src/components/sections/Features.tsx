@@ -22,7 +22,7 @@ const features = [
     icon: Briefcase,
     href: "/jobs",
     color: "from-blue-500 to-cyan-500",
-    textColor: "text-blue-500",
+    textColor: "text-blue-500/80",
     delay: 0,
   },
   {
@@ -33,7 +33,7 @@ const features = [
     icon: Plane,
     href: "/visa",
     color: "from-emerald-500 to-teal-500",
-    textColor: "text-emerald-500",
+    textColor: "text-emerald-500/90",
     delay: 0.1,
   },
   {
@@ -44,7 +44,7 @@ const features = [
     icon: BookOpen,
     href: "/courses",
     color: "from-purple-500 to-pink-500",
-    textColor: "text-purple-500",
+    textColor: "text-purple-500/90",
     delay: 0.2,
   },
   {
@@ -55,7 +55,7 @@ const features = [
     icon: Map,
     href: "/countries",
     color: "from-amber-500 to-orange-500",
-    textColor: "text-amber-500",
+    textColor: "text-amber-500/80",
     delay: 0.3,
   },
   {
@@ -66,7 +66,7 @@ const features = [
     icon: Compass,
     href: "/gateway",
     color: "from-indigo-500 to-blue-500",
-    textColor: "text-indigo-500",
+    textColor: "text-indigo-500/80",
     delay: 0.4,
   },
   {
@@ -77,7 +77,7 @@ const features = [
     icon: Users,
     href: "/stories",
     color: "from-rose-500 to-red-500",
-    textColor: "text-rose-500",
+    textColor: "text-rose-500/80",
     delay: 0.5,
   },
 ];
@@ -108,7 +108,7 @@ const itemVariants: Variants = {
 
 export function Features() {
   return (
-    <section className="py-16 md:py-24 bg-muted/30 overflow-x-hidden">
+    <section className="py-16 md:py-24 bg-background-cold overflow-x-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -142,45 +142,49 @@ export function Features() {
               variants={itemVariants}
               whileHover={{ y: -6 }}
               transition={{ type: "spring", stiffness: 500, damping: 20 }}
-              className="group relative bg-card border rounded-2xl p-6 md:p-8 hover:shadow-xl transition-all duration-200 cursor-pointer"
+              className="group relative bg-card border rounded-2xl p-6 md:p-6 hover:shadow-xl transition-all duration-200 cursor-pointer"
             >
               {/* Gradient Background on Hover */}
               <motion.div
                 className={`absolute inset-0 bg-linear-to-br ${feature.color} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-150`}
               />
 
-              {/* Icon with group hover animation */}
-              <motion.div
-                className={`w-14 h-14 md:w-16 md:h-16 rounded-xl bg-linear-to-br ${feature.color} bg-opacity-10 flex items-center justify-center mb-5 relative overflow-hidden group-hover:scale-110 group-hover:rotate-3 transition-all duration-150`}
-              >
-                {/* Pulsing background */}
+              <div className="flex items-center gap-4 pb-4">
+                {/* Icon with fixed size - no margin bottom */}
                 <motion.div
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 5, -5, 0],
-                  }}
-                  transition={{
-                    duration: 5,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    delay: feature.delay,
-                  }}
-                  className="absolute inset-0 bg-white/20 blur-xl"
-                />
-                <feature.icon
-                  className={`h-7 w-7 md:h-8 md:w-8 relative z-10 transition-colors duration-150 text-background `}
-                />
-              </motion.div>
+                  className={`w-16 h-16 md:w-16 md:h-16 rounded-xl bg-linear-to-br ${feature.color} bg-opacity-10 flex items-center justify-center relative overflow-hidden group-hover:scale-110 group-hover:rotate-3 transition-all duration-150 flex-shrink-0`}
+                >
+                  {/* Pulsing background */}
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 5, -5, 0],
+                    }}
+                    transition={{
+                      duration: 5,
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                      delay: feature.delay,
+                    }}
+                    className="absolute inset-0 bg-white/20 blur-xl"
+                  />
+                  <feature.icon
+                    className={`h-8 w-8 md:h-10 md:w-10 relative z-10 transition-colors duration-150 text-background`}
+                  />
+                </motion.div>
 
-              {/* Title with group hover - now changes to feature color */}
-              <h3
-                className={`text-xl md:text-2xl font-bold mb-3 transition-colors duration-150 group-hover:${feature.textColor}`}
-              >
-                {feature.title}
-              </h3>
+                {/* Title - takes remaining space and handles 2 lines */}
+                <div className="flex-1 min-w-0">
+                  <h3
+                    className={`text-xl md:text-2xl md:pr-8 font-bold transition-colors duration-150 leading-tight ${feature.textColor}`}
+                  >
+                    {feature.title}
+                  </h3>
+                </div>
+              </div>
 
               {/* Description */}
-              <p className="text-muted-foreground text-sm md:text-base mb-4 leading-relaxed">
+              <p className="text-muted-foreground text-sm md:text-base mb-4 leading-6">
                 {feature.description}
               </p>
 

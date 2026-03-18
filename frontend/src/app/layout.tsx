@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { Header } from "@/components/layout/Header"
 import { Footer } from "@/components/layout/Footer"
+import { MobileNavProvider } from "@/context/MobileNavContext"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -60,14 +61,19 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${inter.className} antialiased overflow-x-hidden w-full max-w-[100vw]`}
+        suppressHydrationWarning
       >
-        <div className="w-full overflow-x-hidden">
+        <MobileNavProvider
+        //className="w-full overflow-x-hidden"
+        >
           <Header />
-          <main className="min-h-screen w-full overflow-x-hidden px-0">
+          <main
+          //className="min-h-screen w-full overflow-x-hidden px-0"
+          >
             {children}
           </main>
           <Footer />
-        </div>
+        </MobileNavProvider>
       </body>
     </html>
   );

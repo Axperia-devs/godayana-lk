@@ -21,6 +21,7 @@ import {
   PlaneTakeoff,
 } from "lucide-react";
 import type { Variants } from "framer-motion";
+import Image from "next/image";
 
 // Animation variants
 const containerVariants: Variants = {
@@ -137,22 +138,22 @@ export function Hero() {
 
             {/* Main Heading */}
             <motion.h1
-              variants={itemVariants}
+              //variants={itemVariants}
               className="text-6xl sm:text-5xl md:text-6xl lg:text-[80px] text-center md:text-left font-bold font-sinhala md:pl-8 pb-6 mb-0 md:mb-8 md:pb-12 mt-6 sm:mt-6"
               style={{ lineHeight: "0.85", letterSpacing: "0.04em" }}
             >
               <motion.span
-                animate={{
-                  y: [0, -10, 0],
-                  scale: [1, 1.05, 1],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                  ease: "easeInOut",
-                  delay: 0,
-                }}
+                // animate={{
+                //   y: [0, -10, 0],
+                //   scale: [1, 1.05, 1],
+                // }}
+                // transition={{
+                //   duration: 2,
+                //   repeat: Infinity,
+                //   repeatType: "reverse",
+                //   ease: "easeInOut",
+                //   delay: 0,
+                // }}
                 className="inline-block"
               >
                 ජීවිතේම
@@ -160,17 +161,17 @@ export function Hero() {
               <br />
               <span className="text-primary relative whitespace-nowrap">
                 <motion.span
-                  animate={{
-                    y: [0, -12, 0],
-                    scale: [1, 1.08, 1],
-                  }}
-                  transition={{
-                    duration: 2.2,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    ease: "easeInOut",
-                    delay: 0.2,
-                  }}
+                  // animate={{
+                  //   y: [0, -12, 0],
+                  //   scale: [1, 1.08, 1],
+                  // }}
+                  // transition={{
+                  //   duration: 2.2,
+                  //   repeat: Infinity,
+                  //   repeatType: "reverse",
+                  //   ease: "easeInOut",
+                  //   delay: 0.2,
+                  // }}
                   className="inline-block"
                 >
                   ගොඩයන්න
@@ -215,25 +216,16 @@ export function Hero() {
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="absolute inset-10 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-3xl border border-primary/20 flex items-center justify-center backdrop-blur-sm"
+                  className="absolute inset-10 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-3xl border border-primary/20 flex items-center justify-center backdrop-blur-sm overflow-hidden"
                 >
-                  <motion.div
-                    animate={{
-                      y: [0, -10, 0],
-                    }}
-                    transition={{
-                      duration: 5,
-                      repeat: Infinity,
-                      repeatType: "reverse",
-                    }}
-                    className="text-center"
-                  >
-                    <Briefcase className="h-16 w-16 text-primary/40 mx-auto mb-4" />
-                    <p className="text-muted-foreground">Hero Image</p>
-                    <p className="text-xs text-muted-foreground/60">
-                      Replace with your image
-                    </p>
-                  </motion.div>
+                  <Image
+                    src="/images/hero.jpg"
+                    alt="Hero"
+                    fill
+                    className="object-cover rounded-3xl"
+                    sizes="(max-width: 868px) 100vw, 50vw"
+                    priority
+                  />
                 </motion.div>
 
                 {/* Floating stats - Repositioned for mobile */}
@@ -453,8 +445,9 @@ export function Hero() {
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className="absolute inset-10 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-3xl border border-primary/20 flex items-center justify-center backdrop-blur-sm"
+                className="absolute inset-10 rounded-3xl flex items-center justify-center"
               >
+                {/* Animated overlay with your specified animation */}
                 <motion.div
                   animate={{
                     y: [0, -10, 0],
@@ -464,15 +457,17 @@ export function Hero() {
                     repeat: Infinity,
                     repeatType: "reverse",
                   }}
-                  className="text-center"
+                  className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm rounded-3xl border border-primary/20"
                 >
-                  <Briefcase className="h-12 sm:h-16 w-12 sm:w-16 text-primary/40 mx-auto mb-2 sm:mb-4" />
-                  <p className="text-muted-foreground text-sm sm:text-base">
-                    Hero Image
-                  </p>
-                  <p className="text-xs text-muted-foreground/60">
-                    Replace with your image
-                  </p>
+                  {/* Image */}
+                  <Image
+                    src="/images/hero.jpg"
+                    alt="Hero"
+                    fill
+                    className="object-cover rounded-3xl"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    priority
+                  />
                 </motion.div>
               </motion.div>
 

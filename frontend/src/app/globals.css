@@ -31,6 +31,7 @@
   /* Theme Colors using CSS variables */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-background-cold: var(--background-cold);
 
   /* Sidebar Colors */
   --color-sidebar-ring: var(--sidebar-ring);
@@ -81,6 +82,8 @@
   /* Light Mode - Godayana.lk Theme */
   --background: oklch(0.98 0.01 100);
   /* Warm white - like Sri Lankan sand */
+  --background-cold: oklch(97.497% 0.01212 281.002);
+  /* Cooler white for contrast */
   --foreground: oklch(0.25 0.02 260);
   /* Deep blue-gray */
 
@@ -170,6 +173,8 @@
   /* Dark Mode - Godayana.lk Theme */
   --background: oklch(0.15 0.02 260);
   /* Deep ocean */
+  --background-cold: oklch(0.2 0.02 260);
+  /* Cooler dark gray */
   --foreground: oklch(0.95 0.01 100);
   /* Warm white */
 
