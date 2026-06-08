@@ -1,51 +1,37 @@
 {
   "projects": [
     {
-      "name": "godayana",
+      "name": "godayana-backend",
       "services": [
         {
           "name": "auth-service",
-          "rootDirectory": "services/auth-service",
-          "buildCommand": "../mvnw clean package -DskipTests",
-          "startCommand": "java -jar target/*.jar",
+          "rootDirectory": "backend/services/auth-service",
+          "buildCommand": "../../mvnw clean package -DskipTests",
+          "startCommand": "java -jar -Dspring.profiles.active=railway target/*.jar",
           "healthcheckPath": "/actuator/health",
-          "env": {
-            "PORT": "8081",
-            "SPRING_PROFILES_ACTIVE": "production"
-          }
+          "domains": ["auth.godayana.up.railway.app"]
         },
         {
           "name": "otp-service",
-          "rootDirectory": "services/otp-service",
-          "buildCommand": "../mvnw clean package -DskipTests",
-          "startCommand": "java -jar target/*.jar",
-          "healthcheckPath": "/actuator/health",
-          "env": {
-            "PORT": "8090",
-            "SPRING_PROFILES_ACTIVE": "production"
-          }
+          "rootDirectory": "backend/services/otp-service",
+          "buildCommand": "../../mvnw clean package -DskipTests",
+          "startCommand": "java -jar -Dspring.profiles.active=railway target/*.jar",
+          "healthcheckPath": "/actuator/health"
         },
         {
           "name": "user-service",
-          "rootDirectory": "services/user-service",
-          "buildCommand": "../mvnw clean package -DskipTests",
-          "startCommand": "java -jar target/*.jar",
-          "healthcheckPath": "/actuator/health",
-          "env": {
-            "PORT": "8082",
-            "SPRING_PROFILES_ACTIVE": "production"
-          }
+          "rootDirectory": "backend/services/user-service",
+          "buildCommand": "../../mvnw clean package -DskipTests",
+          "startCommand": "java -jar -Dspring.profiles.active=railway target/*.jar",
+          "healthcheckPath": "/actuator/health"
         },
         {
           "name": "api-gateway",
-          "rootDirectory": "services/api-gateway",
-          "buildCommand": "../mvnw clean package -DskipTests",
-          "startCommand": "java -jar target/*.jar",
+          "rootDirectory": "backend/services/api-gateway",
+          "buildCommand": "../../mvnw clean package -DskipTests",
+          "startCommand": "java -jar -Dspring.profiles.active=railway target/*.jar",
           "healthcheckPath": "/actuator/health",
-          "env": {
-            "PORT": "8080",
-            "SPRING_PROFILES_ACTIVE": "production"
-          }
+          "domains": ["api.godayana.up.railway.app"]
         }
       ]
     }

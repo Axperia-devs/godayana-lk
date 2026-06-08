@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["openjdk17"]
+
+[phases.install]
+cmds = ["../../mvnw clean package -DskipTests -pl services/user-service -am"]
+
+[phases.start]
+cmd = "java -jar -Dspring.profiles.active=railway target/*.jar"
+
+[deploy]
+healthcheck = "/actuator/health"

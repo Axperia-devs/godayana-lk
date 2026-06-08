@@ -1,10 +1,14 @@
 [build]
-builder = "NIXPACKS"
-buildCommand = "cd ../.. && ./mvnw clean package -DskipTests -pl services/otp-service -am"
+builder = "nixpacks"
+buildCommand = "../../mvnw clean package -DskipTests -pl services/otp-service -am"
 
 [deploy]
-startCommand = "java -jar target/otp-service.jar"
+startCommand = "java -jar -Dspring.profiles.active=railway target/*.jar"
 healthcheckPath = "/actuator/health"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
 
-[env]
+[deploy.env]
 PORT = "8090"
+SPRING_PROFILES_ACTIVE = "railway"
