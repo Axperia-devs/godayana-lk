@@ -1,0 +1,10 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "cd ../.. && ./mvnw clean package -DskipTests -pl services/user-service -am"
+
+[deploy]
+startCommand = "java -jar target/user-service.jar"
+healthcheckPath = "/actuator/health"
+
+[env]
+PORT = "8082"

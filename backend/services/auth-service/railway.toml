@@ -1,0 +1,10 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "cd ../.. && ./mvnw clean package -DskipTests -pl services/auth-service -am"
+
+[deploy]
+startCommand = "java -jar target/auth-service.jar"
+healthcheckPath = "/actuator/health"
+
+[env]
+PORT = "8081"

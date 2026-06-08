@@ -1,0 +1,10 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "cd ../.. && ./mvnw clean package -DskipTests -pl services/otp-service -am"
+
+[deploy]
+startCommand = "java -jar target/otp-service.jar"
+healthcheckPath = "/actuator/health"
+
+[env]
+PORT = "8090"
