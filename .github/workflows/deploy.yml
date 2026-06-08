@@ -45,7 +45,7 @@ jobs:
           OTP_DB_PASSWORD: ${{ secrets.OTP_DB_PASSWORD }}
         run: |
           echo "Token length: ${#RAILWAY_TOKEN}"
-          railway whoam
+          railway whoami
           
           echo "Linking to project..."
           railway link --project "$RAILWAY_PROJECT_ID"
