@@ -7,11 +7,9 @@ spring:
   application:
     name: otp-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/otp_db
-    #username: godayana
-    username: postgres
-    #password: dev123
-    password: 123456
+    url: ${OTP_DB_URL:jdbc:postgresql://localhost:5432/otp_db}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   flyway:
     enabled: true

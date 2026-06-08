@@ -7,16 +7,14 @@ spring:
   application:
     name: auth-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/auth_db
-    #username: godayana
-    username: postgres
-    #password: dev123
-    password: 123456
+    url: ${AUTH_DB_URL:jdbc:postgresql://localhost:5432/auth_db}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: ${SHOW_SQL:true}
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -27,21 +25,21 @@ spring:
     repair: true  # Auto-repair on startup
 
 jwt:
-  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-  expiration: 86400000
-  refresh-expiration: 604800000
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
 
 otp:
   service:
-    url: http://localhost:8090
+    url: ${OTP_SERVICE_URL:http://localhost:8090}
 
 notification:
   service:
-    url: http://localhost:8089
+    url: ${NOTIFICATION_SERVICE_URL:http://localhost:8089}
 
 user:
   service:
-    url: http://localhost:8082
+    url: ${USER_SERVICE_URL:http://localhost:8082}
 
 logging:
   level:
