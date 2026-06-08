@@ -34,7 +34,7 @@ jobs:
 
       - name: Deploy databases (only if not exist)
         env:
-          RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
           RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
           AUTH_DB_PASSWORD: ${{ secrets.AUTH_DB_PASSWORD }}
           USER_DB_PASSWORD: ${{ secrets.USER_DB_PASSWORD }}
