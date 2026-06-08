@@ -47,7 +47,8 @@ jobs:
           # Deploy Auth Database
           if ! railway service list 2>/dev/null | grep -q "postgres-auth"; then
             echo "📦 Creating postgres-auth database..."
-            railway up --service postgres-auth --template postgresql
+            railway up --service postgres-auth
+            railway add postgresql --service postgres-auth
             sleep 10
             railway variables --service postgres-auth set POSTGRES_PASSWORD="$AUTH_DB_PASSWORD"
             echo "✅ postgres-auth created"
@@ -58,7 +59,8 @@ jobs:
           # Deploy User Database
           if ! railway service list 2>/dev/null | grep -q "postgres-user"; then
             echo "📦 Creating postgres-user database..."
-            railway up --service postgres-user --template postgresql
+            railway up --service postgres-user
+            railway add postgresql --service postgres-user
             sleep 10
             railway variables --service postgres-user set POSTGRES_PASSWORD="$USER_DB_PASSWORD"
             echo "✅ postgres-user created"
@@ -69,7 +71,8 @@ jobs:
           # Deploy OTP Database
           if ! railway service list 2>/dev/null | grep -q "postgres-otp"; then
             echo "📦 Creating postgres-otp database..."
-            railway up --service postgres-otp --template postgresql
+            railway up --service postgres-otp
+            railway add postgresql --service postgres-otp
             sleep 10
             railway variables --service postgres-otp set POSTGRES_PASSWORD="$OTP_DB_PASSWORD"
             echo "✅ postgres-otp created"
