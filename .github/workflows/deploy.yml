@@ -47,8 +47,11 @@ jobs:
           # Deploy Auth Database
           if ! railway service list 2>/dev/null | grep -q "postgres-auth"; then
             echo "📦 Creating postgres-auth database..."
-            railway add --database postgres --name postgres-auth
-            sleep 10
+            railway add --database postgres
+            sleep 5
+            # Get the service name (it will be something like 'postgres1234')
+            AUTH_SERVICE=$(railway service list | grep postgres | tail -1 | awk '{print $1}')
+            railway service rename "$AUTH_SERVICE" postgres-auth
             railway variables --service postgres-auth set POSTGRES_PASSWORD="$AUTH_DB_PASSWORD"
             echo "✅ postgres-auth created"
           else
@@ -58,8 +61,10 @@ jobs:
           # Deploy User Database
           if ! railway service list 2>/dev/null | grep -q "postgres-user"; then
             echo "📦 Creating postgres-user database..."
-            railway add --database postgres --name postgres-user
-            sleep 10
+            railway add --database postgres
+            sleep 5
+            USER_SERVICE=$(railway service list | grep postgres | tail -1 | awk '{print $1}')
+            railway service rename "$USER_SERVICE" postgres-user
             railway variables --service postgres-user set POSTGRES_PASSWORD="$USER_DB_PASSWORD"
             echo "✅ postgres-user created"
           else
@@ -69,8 +74,10 @@ jobs:
           # Deploy OTP Database
           if ! railway service list 2>/dev/null | grep -q "postgres-otp"; then
             echo "📦 Creating postgres-otp database..."
-            railway add --database postgres --name postgres-otp
-            sleep 10
+            railway add --database postgres
+            sleep 5
+            OTP_SERVICE=$(railway service list | grep postgres | tail -1 | awk '{print $1}')
+            railway service rename "$OTP_SERVICE" postgres-otp
             railway variables --service postgres-otp set POSTGRES_PASSWORD="$OTP_DB_PASSWORD"
             echo "✅ postgres-otp created"
           else
