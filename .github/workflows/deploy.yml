@@ -50,7 +50,7 @@ jobs:
           if [ -z "$RAILWAY_PROJECT_ID" ]; then
             echo "⚠️ RAILWAY_PROJECT_ID not set, will try to link by name"
           else
-            echo "✅ RAILWAY_PROJECT_ID is set"
+            echo "✅ RAILWAY_PROJECT_ID is set, length: ${#RAILWAY_PROJECT_ID}, value: '${RAILWAY_PROJECT_ID}'"
           fi
 
           if [ -n "$RAILWAY_PROJECT_ID" ]; then
