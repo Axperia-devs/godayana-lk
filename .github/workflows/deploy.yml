@@ -28,11 +28,8 @@ jobs:
           #rm -f ~/.railway/bin/railway
           #rm -f /usr/local/bin/railway
           
-          #curl -fsSL https://railway.com/install.sh | bash
-          #echo "$HOME/.railway/bin" >> $GITHUB_PATH
-
-          npm install -g @railway/cli
-          echo "$(npm config get prefix)/bin" >> $GITHUB_PATH
+          curl -fsSL https://railway.com/install.sh | bash
+          echo "$HOME/.railway/bin" >> $GITHUB_PATH
 
       - name: Verify Railway CLI installation
         run: |
