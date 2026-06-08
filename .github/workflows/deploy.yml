@@ -44,44 +44,39 @@ jobs:
           USER_DB_PASSWORD: ${{ secrets.USER_DB_PASSWORD }}
           OTP_DB_PASSWORD: ${{ secrets.OTP_DB_PASSWORD }}
         run: |
-          PROJECT_ID="$RAILWAY_PROJECT_ID"
-          
           # Deploy Auth Database
-          echo "Checking postgres-auth..."
-          if ! railway service list --project "$PROJECT_ID" 2>/dev/null | grep -q "postgres-auth"; then
+          if ! railway service list 2>/dev/null | grep -q "postgres-auth"; then
             echo "📦 Creating postgres-auth database..."
-            railway up --project "$PROJECT_ID" --service postgres-auth --template postgresql
+            railway up --service postgres-auth --template postgresql
             sleep 10
-            railway variables --project "$PROJECT_ID" --service postgres-auth set POSTGRES_PASSWORD="$AUTH_DB_PASSWORD"
+            railway variables --service postgres-auth set POSTGRES_PASSWORD="$AUTH_DB_PASSWORD"
             echo "✅ postgres-auth created"
           else
             echo "✅ postgres-auth already exists - skipping"
           fi
           
           # Deploy User Database
-          echo "Checking postgres-user..."
-          if ! railway service list --project "$PROJECT_ID" 2>/dev/null | grep -q "postgres-user"; then
+          if ! railway service list 2>/dev/null | grep -q "postgres-user"; then
             echo "📦 Creating postgres-user database..."
-            railway up --project "$PROJECT_ID" --service postgres-user --template postgresql
+            railway up --service postgres-user --template postgresql
             sleep 10
-            railway variables --project "$PROJECT_ID" --service postgres-user set POSTGRES_PASSWORD="$USER_DB_PASSWORD"
+            railway variables --service postgres-user set POSTGRES_PASSWORD="$USER_DB_PASSWORD"
             echo "✅ postgres-user created"
           else
             echo "✅ postgres-user already exists - skipping"
           fi
           
           # Deploy OTP Database
-          echo "Checking postgres-otp..."
-          if ! railway service list --project "$PROJECT_ID" 2>/dev/null | grep -q "postgres-otp"; then
+          if ! railway service list 2>/dev/null | grep -q "postgres-otp"; then
             echo "📦 Creating postgres-otp database..."
-            railway up --project "$PROJECT_ID" --service postgres-otp --template postgresql
+            railway up --service postgres-otp --template postgresql
             sleep 10
-            railway variables --project "$PROJECT_ID" --service postgres-otp set POSTGRES_PASSWORD="$OTP_DB_PASSWORD"
+            railway variables --service postgres-otp set POSTGRES_PASSWORD="$OTP_DB_PASSWORD"
             echo "✅ postgres-otp created"
           else
             echo "✅ postgres-otp already exists - skipping"
           fi
-          
+        
           echo "🎉 Database deployment check completed!"
 
   # ============ DETECT CHANGED SERVICES ============
