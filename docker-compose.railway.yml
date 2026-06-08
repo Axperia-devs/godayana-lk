@@ -1,0 +1,162 @@
+version: '3.8'
+
+services:
+  postgres-auth:
+    build:
+      context: ./backend/docker/postgres-auth
+      dockerfile: Dockerfile
+    container_name: postgres-auth
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+      POSTGRES_DB: auth_db
+    volumes:
+      - postgres-auth-data:/var/lib/postgresql/data
+    networks:
+      - godayana-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U godayana -d auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-user:
+    build:
+      context: ./backend/docker/postgres-user
+      dockerfile: Dockerfile
+    container_name: postgres-user
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
+      POSTGRES_DB: user_db
+    volumes:
+      - postgres-user-data:/var/lib/postgresql/data
+    networks:
+      - godayana-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U godayana -d user_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-otp:
+    build:
+      context: ./backend/docker/postgres-otp
+      dockerfile: Dockerfile
+    container_name: postgres-otp
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${OTP_DB_PASSWORD}
+      POSTGRES_DB: otp_db
+    volumes:
+      - postgres-otp-data:/var/lib/postgresql/data
+    networks:
+      - godayana-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U godayana -d otp_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    image: ${DOCKER_USERNAME}/godayana-auth-service:${IMAGE_TAG:-latest}
+    container_name: auth-service
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: godayana
+      SPRING_DATASOURCE_PASSWORD: ${AUTH_DB_PASSWORD}
+      SERVER_PORT: 8081
+      JWT_SECRET: ${JWT_SECRET}
+      USER_SERVICE_URL: http://user-service:8082
+      OTP_SERVICE_URL: http://otp-service:8090
+    networks:
+      - godayana-network
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+
+  user-service:
+    image: ${DOCKER_USERNAME}/godayana-user-service:${IMAGE_TAG:-latest}
+    container_name: user-service
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/user_db
+      SPRING_DATASOURCE_USERNAME: godayana
+      SPRING_DATASOURCE_PASSWORD: ${USER_DB_PASSWORD}
+      SERVER_PORT: 8082
+    networks:
+      - godayana-network
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+    ports:
+      - "8082:8082"
+
+  otp-service:
+    image: ${DOCKER_USERNAME}/godayana-otp-service:${IMAGE_TAG:-latest}
+    container_name: otp-service
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-otp:5432/otp_db
+      SPRING_DATASOURCE_USERNAME: godayana
+      SPRING_DATASOURCE_PASSWORD: ${OTP_DB_PASSWORD}
+      SERVER_PORT: 8090
+    networks:
+      - godayana-network
+    depends_on:
+      postgres-otp:
+        condition: service_healthy
+    ports:
+      - "8090:8090"
+
+  api-gateway:
+    image: ${DOCKER_USERNAME}/godayana-api-gateway:${IMAGE_TAG:-latest}
+    container_name: api-gateway
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      SERVER_PORT: 8080
+      AUTH_SERVICE_URL: http://auth-service:8081
+      USER_SERVICE_URL: http://user-service:8082
+      OTP_SERVICE_URL: http://otp-service:8090
+      JWT_SECRET: ${JWT_SECRET}
+    networks:
+      - godayana-network
+    depends_on:
+      - auth-service
+      - user-service
+      - otp-service
+    ports:
+      - "8080:8080"
+
+  frontend:
+    image: ${DOCKER_USERNAME}/godayana-frontend:${IMAGE_TAG:-latest}
+    container_name: frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api-gateway:8080}
+    networks:
+      - godayana-network
+    depends_on:
+      - api-gateway
+    ports:
+      - "3000:3000"
+
+networks:
+  godayana-network:
+    driver: bridge
+
+volumes:
+  postgres-auth-data:
+    external: true
+  postgres-user-data:
+    external: true
+  postgres-otp-data:
+    external: true

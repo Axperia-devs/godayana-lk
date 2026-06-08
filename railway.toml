@@ -1,0 +1,26 @@
+[project]
+name = "godayana-platform"
+
+[services.postgres-auth]
+source = { docker = "backend/docker/postgres-auth" }
+
+[services.postgres-user]
+source = { docker = "backend/docker/postgres-user" }
+
+[services.postgres-otp]
+source = { docker = "backend/docker/postgres-otp" }
+
+[services.auth-service]
+source = { docker = "${DOCKER_USERNAME}/godayana-auth-service" }
+
+[services.user-service]
+source = { docker = "${DOCKER_USERNAME}/godayana-user-service" }
+
+[services.otp-service]
+source = { docker = "${DOCKER_USERNAME}/godayana-otp-service" }
+
+[services.api-gateway]
+source = { docker = "${DOCKER_USERNAME}/godayana-api-gateway" }
+
+[services.frontend]
+source = { docker = "${DOCKER_USERNAME}/godayana-frontend" }

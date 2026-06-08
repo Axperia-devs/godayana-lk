@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  postgres-auth:
+    build: ./backend/docker/postgres-auth
+    environment:
+      POSTGRES_PASSWORD: dev123
+      POSTGRES_DB: auth_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-auth-data:/var/lib/postgresql/data
+
+  postgres-user:
+    build: ./backend/docker/postgres-user
+    environment:
+      POSTGRES_PASSWORD: dev123
+      POSTGRES_DB: user_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-user-data:/var/lib/postgresql/data
+
+  postgres-otp:
+    build: ./backend/docker/postgres-otp
+    environment:
+      POSTGRES_PASSWORD: dev123
+      POSTGRES_DB: otp_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-otp-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-auth-data:
+  postgres-user-data:
+  postgres-otp-data:

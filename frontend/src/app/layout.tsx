@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "react-hot-toast";
@@ -6,6 +6,13 @@ import { ReduxProvider } from "@/lib/redux/Provider";
 import { ThemeProvider } from "next-themes";
 
 const inter = Inter({ subsets: ["latin"] })
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: {
@@ -61,10 +68,10 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  other: {
-    viewport:
-      "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover",
-  },
+  // other: {
+  //   viewport:
+  //     "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover",
+  // },
 };
 
 export default function RootLayout({

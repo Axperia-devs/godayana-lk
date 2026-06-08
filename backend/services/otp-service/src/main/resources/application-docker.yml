@@ -1,0 +1,68 @@
+server:
+  port: 8090
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+
+spring:
+  profiles:
+    include: common
+  application:
+    name: otp-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres-otp:5432/otp_db}
+    username: ${SPRING_DATASOURCE_USERNAME:godayana}
+    password: ${SPRING_DATASOURCE_PASSWORD:dev123}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: true
+    locations: classpath:db/migration
+  mail:
+    host: ${MAIL_HOST:mailhog}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+          timeout: 5000
+          connection-timeout: 5000
+          write-timeout: 5000
+
+otp:
+  length: ${OTP_LENGTH:6}
+  expiration-minutes: ${OTP_EXPIRATION_MINUTES:5}
+  max-attempts: ${OTP_MAX_ATTEMPTS:3}
+
+logging:
+  level:
+    com.godayana: INFO
+    org.springframework.mail: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
