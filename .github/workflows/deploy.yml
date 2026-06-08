@@ -25,10 +25,10 @@ jobs:
       - name: Install Railway CLI
         run: |
           # Remove old version if exists
-          #rm -f ~/.railway/bin/railway
-          #rm -f /usr/local/bin/railway
+          rm -f ~/.railway/bin/railway
+          rm -f /usr/local/bin/railway
           
-          curl -fsSL https://railway.com/install.sh | bash
+          curl -fsSL railway.com/install.sh | bash
           echo "$HOME/.railway/bin" >> $GITHUB_PATH
 
       - name: Verify Railway CLI installation
