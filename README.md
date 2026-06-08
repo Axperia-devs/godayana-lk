@@ -72,13 +72,36 @@ cd frontend && npm run dev
 - Deployment Guide
 
 ## 🚢 Deployment
-Each service is independently deployable to Railway:
+# Godayana Platform - Complete Deployment Guide
+
+## Prerequisites
+
+1. GitHub account
+2. Docker Hub account
+3. Railway account
+
+## Initial Setup (One Time)
+
+### 1. Add GitHub Secrets
+
+Go to your GitHub repository → Settings → Secrets and variables → Actions → Add these secrets:
+
+| Secret Name | Value |
+|-------------|-------|
+| `DOCKER_USERNAME` | Your Docker Hub username |
+| `DOCKER_PASSWORD` | Your Docker Hub access token |
+| `RAILWAY_API_TOKEN` | Your Railway API token |
+| `AUTH_DB_PASSWORD` | Secure password for auth database |
+| `USER_DB_PASSWORD` | Secure password for user database |
+| `OTP_DB_PASSWORD` | Secure password for OTP database |
+| `JWT_SECRET` | Run: `openssl rand -base64 64` |
+
+### 2. First Deployment
 
 ```bash
-# Deploy specific service
-cd services/auth-service
-railway up --service auth-service
-```
+git add .
+git commit -m "Initial deployment"
+git push origin main
 
 ## 📊 Monitoring
 

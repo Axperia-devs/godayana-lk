@@ -77,7 +77,7 @@ const floatingVariants2: Variants = {
 
 export function Hero() {
   return (
-    <section className="relative pt-0 md:pt-0 min-h-[calc(100vh-60px)] md:h-[calc(100vh-80px)] overflow-y-hidden overflow-x-hidden w-full">
+    <section className="relative pt-0 md:pt-0 min-h-[calc(100vh-100px)] md:h-[calc(100vh-80px)] overflow-y-hidden overflow-x-hidden w-full bg-gradient-to-r from-blue-900 via-blue-700/80 to-blue-500/80 dark:from-blue-950/70 dark:via-blue-900/60 dark:to-background">
       {/* Background decorative elements with animation */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
@@ -114,86 +114,66 @@ export function Hero() {
         <div className="absolute bottom-10 right-0 w-40 h-40 bg-secondary/5 rounded-full blur-3xl md:hidden" />
       </motion.div>
 
-      <div className="w-full px-4 sm:px-6 md:px-8 lg:px-8 max-w-[100vw] overflow-x-hidden overflow-y-hidden">
+      <div className="w-full px-4 sm:px-6 md:px-8 lg:px-8 max-w-[100vw] overflow-x-hidden overflow-y-hidden h-full items-center justify-center flex">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid lg:grid-cols-2 gap-8 md:gap-12"
+          className="grid lg:grid-cols-2 gap-8 md:gap-12 h-full"
         >
           {/* Left Column - Content */}
-          <div className="space-y-4 md:space-y-6 px-2 sm:px-0 flex-col items-center md:items-start text-center md:text-left">
+          <div className="px-2 sm:px-0 flex flex-col justify-between md:h-[calc(100vh-80px)] text-center md:text-left">
             {/* NEW Badge */}
-            <motion.div variants={itemVariants}>
-              <Badge
-                variant="secondary"
-                className="bg-blue-100 dark:bg-blue-950 text-primary border border-blue-200 dark:border-blue-900 px-3 sm:px-4 py-1.5 sm:py-2 mt-3 sm:mt-4 text-[8px] sm:text-[10px] font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-full"
-              >
-                <span className="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full mr-1 shrink-0"></span>
-                <span className="truncate">
-                  NEW: OVERSEAS OPPORTUNITIES IN 15+ COUNTRIES
-                </span>
-              </Badge>
-            </motion.div>
+            <div>
+              <motion.div variants={itemVariants}>
+                <Badge
+                  variant="secondary"
+                  className="bg-blue-100/30 dark:bg-blue-950 text-white dark:text-primary border border-blue-200 dark:border-blue-900 px-3 sm:px-4 py-1.5 sm:py-2 mt-3 sm:mt-4 text-[8px] sm:text-[10px] font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-full"
+                >
+                  <span className="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-100/80 dark:bg-primary rounded-full mr-1 shrink-0"></span>
+                  <span className="truncate">
+                    NEW: OVERSEAS OPPORTUNITIES IN 15+ COUNTRIES
+                  </span>
+                </Badge>
+              </motion.div>
+            </div>
 
             {/* Main Heading */}
-            <motion.h1
-              //variants={itemVariants}
-              className="text-6xl sm:text-5xl md:text-6xl lg:text-[80px] text-center md:text-left font-bold font-sinhala md:pl-8 pb-6 mb-0 md:mb-8 md:pb-12 mt-6 sm:mt-6"
-              style={{ lineHeight: "0.85", letterSpacing: "0.04em" }}
-            >
-              <motion.span
-                // animate={{
-                //   y: [0, -10, 0],
-                //   scale: [1, 1.05, 1],
-                // }}
-                // transition={{
-                //   duration: 2,
-                //   repeat: Infinity,
-                //   repeatType: "reverse",
-                //   ease: "easeInOut",
-                //   delay: 0,
-                // }}
-                className="inline-block"
+            <div>
+              <motion.h1
+                className="text-7xl sm:text-5xl md:text-6xl lg:text-[90px] xl:text-8xl text-center font-bold font-sinhala md:pl-8 pt-12 md:pt-0"
+                style={{ lineHeight: "0.5", letterSpacing: "0.01em" }}
               >
-                ජීවිතේම
-              </motion.span>{" "}
-              <br />
-              <span className="text-primary relative whitespace-nowrap">
-                <motion.span
-                  // animate={{
-                  //   y: [0, -12, 0],
-                  //   scale: [1, 1.08, 1],
-                  // }}
-                  // transition={{
-                  //   duration: 2.2,
-                  //   repeat: Infinity,
-                  //   repeatType: "reverse",
-                  //   ease: "easeInOut",
-                  //   delay: 0.2,
-                  // }}
-                  className="inline-block"
-                >
-                  ගොඩයන්න
-                </motion.span>
-                <motion.svg
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ delay: 1, duration: 0.8, ease: "easeOut" }}
-                  className="absolute -bottom-6 sm:-bottom-8 md:-bottom-10 left-0 w-full h-6 sm:h-8 md:h-10 text-primary/20"
-                  viewBox="0 0 100 10"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M0,5 Q25,10 50,5 T100,5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    fill="none"
-                  />
-                </motion.svg>
-              </span>
-              <br />
-            </motion.h1>
+                <span className="inline-block text-white font-fm-gamunu">
+                  ජීවිතේම
+                </span>{" "}
+                <br />
+                <span className="text-secondary relative whitespace-nowrap">
+                  <span className="inline-block font-fm-gamunu text-8xl md:text-9xl">
+                    ගොඩයන්න
+                  </span>
+                  {/* <motion.svg
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ delay: 1, duration: 0.8, ease: "easeOut" }}
+                    className="absolute -bottom-6 sm:-bottom-8 md:-bottom-10 left-0 w-full h-6 sm:h-8 md:h-10 text-primary/20"
+                    viewBox="0 0 100 10"
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      d="M0,5 Q25,10 50,5 T100,5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      fill="none"
+                    />
+                  </motion.svg> */}
+                </span>
+                <br />
+              </motion.h1>
+              <div className="text-center text-lg md:pl-8 text-white/80">
+                Powering Careers. Connecting Talent.
+              </div>
+            </div>
 
             {/* Mobile Image - Shown only below lg breakpoint */}
             <div className="lg:hidden w-full px-4">
@@ -280,143 +260,90 @@ export function Hero() {
             </div>
 
             {/* Description */}
-            <motion.p
-              variants={itemVariants}
-              className="text-sm sm:text-base md:text-md text-muted-foreground max-w-lg px-4 sm:px-0 text-center md:text-left -mt-8 md:mt-0"
-            >
-              The premier platform connecting Sri Lankan talent with top local
-              companies and global employers. Your career journey starts here.
-            </motion.p>
-
-            {/* Stats */}
-            {/* <motion.div
-              variants={itemVariants}
-              className="flex flex-wrap items-center gap-8 pt-6"
-            >
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="flex items-center gap-3 cursor-default"
+            <div>
+              {/* <motion.p
+                variants={itemVariants}
+                className="text-sm sm:text-base md:text-md xl:text-lg text-white/90 max-w-lg px-4 sm:px-0 text-center md:text-left"
               >
+                The premier platform connecting Sri Lankan talent with top local
+                companies and global employers. Your career journey starts here.
+              </motion.p> */}
+
+              {/* Bottom Section */}
+              {/* Search Form */}
+              <motion.div variants={itemVariants} className="px-2 sm:px-0">
                 <motion.div
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  className="bg-card/80 border rounded-lg p-2 sm:p-1 flex flex-col sm:flex-row gap-2 shadow-sm w-full"
                 >
-                  <Briefcase className="h-5 w-5 text-primary" />
-                </motion.div>
-                <div>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.5, duration: 0.5 }}
-                    className="text-2xl font-bold"
-                  >
-                    2,450+
-                  </motion.div>
-                  <div className="text-sm text-muted-foreground">
-                    Active Vacancies
+                  <div className="flex-1 w-full">
+                    <Input
+                      type="text"
+                      placeholder="Job title or keywords"
+                      className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 w-full text-sm sm:text-base"
+                    />
                   </div>
-                </div>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="flex items-center gap-3 cursor-default"
-              >
-                <motion.div
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center"
-                >
-                  <Globe className="h-5 w-5 text-secondary-foreground" />
-                </motion.div>
-                <div>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.7, duration: 0.5 }}
-                    className="text-2xl font-bold"
-                  >
-                    840+
-                  </motion.div>
-                  <div className="text-sm text-muted-foreground">
-                    Overseas Jobs
+                  <div className="w-full sm:w-48 cursor-pointer">
+                    <Select>
+                      <SelectTrigger className="w-full text-sm sm:text-base">
+                        <SelectValue placeholder="Select Location" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="colombo">Local</SelectItem>
+                        <SelectItem value="overseas">Overseas</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                </div>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full sm:w-auto"
+                  >
+                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 w-full sm:w-auto cursor-pointer text-sm sm:text-base">
+                      Search Jobs
+                    </Button>
+                  </motion.div>
+                </motion.div>
               </motion.div>
-            </motion.div> */}
+            </div>
 
-            {/* Search Form */}
-            <motion.div
-              variants={itemVariants}
-              className="md:pt-4 sm:pt-6 px-2 sm:px-0"
-            >
+            <div>
+              {/* Trust Indicators */}
               <motion.div
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                className="bg-card border rounded-lg p-2 sm:p-1 flex flex-col sm:flex-row gap-2 shadow-sm w-full"
-              >
-                <div className="flex-1 w-full">
-                  <Input
-                    type="text"
-                    placeholder="Job title or keywords"
-                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 w-full text-sm sm:text-base"
-                  />
-                </div>
-                <div className="w-full sm:w-48 cursor-pointer">
-                  <Select>
-                    <SelectTrigger className="w-full text-sm sm:text-base">
-                      <SelectValue placeholder="Select Location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="colombo">Colombo</SelectItem>
-                      <SelectItem value="kandy">Kandy</SelectItem>
-                      <SelectItem value="galle">Galle</SelectItem>
-                      <SelectItem value="overseas">Overseas</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto"
-                >
-                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 w-full sm:w-auto cursor-pointer text-sm sm:text-base">
-                    Search Jobs
-                  </Button>
-                </motion.div>
-              </motion.div>
-            </motion.div>
-
-            {/* Trust Indicators */}
-            <motion.div
-              variants={itemVariants}
-              className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6 md:pt-2 pb-4 md:pb-2 text-xs sm:text-sm text-muted-foreground px-2 sm:px-0"
-            >
-              <motion.div
-                whileHover={{ x: 5 }}
-                className="flex items-center gap-1 sm:gap-2 cursor-default"
+                variants={itemVariants}
+                className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground px-2 sm:px-0 pb-2 pt-6 md:pt-0"
               >
                 <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                  whileHover={{ x: 5 }}
+                  className="flex items-center gap-1 sm:gap-2 cursor-default"
                 >
-                  <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-primary shrink-0" />
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-white/80 shrink-0" />
+                  </motion.div>
+                  <span className="whitespace-nowrap text-white/80">
+                    Verified Companies
+                  </span>
                 </motion.div>
-                <span className="whitespace-nowrap">Verified Companies</span>
-              </motion.div>
-              <motion.div
-                whileHover={{ x: 5 }}
-                className="flex items-center gap-1 sm:gap-2 cursor-default"
-              >
                 <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                  whileHover={{ x: 5 }}
+                  className="flex items-center gap-1 sm:gap-2 cursor-default"
                 >
-                  <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-primary shrink-0" />
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                  >
+                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-primary shrink-0 text-white/80" />
+                  </motion.div>
+                  <span className="whitespace-nowrap text-white/80">
+                    Daily Updates
+                  </span>
                 </motion.div>
-                <span className="whitespace-nowrap">Daily Updates</span>
               </motion.div>
-            </motion.div>
+            </div>
           </div>
 
           {/* Right Column - Visual/Image - Hidden on mobile, shown on lg */}
@@ -424,9 +351,9 @@ export function Hero() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative hidden lg:block -mt-4"
+            className="relative hidden lg:block"
           >
-            <div className="relative aspect-square max-w-lg mx-auto">
+            <div className="relative aspect-square max-w-lg mx-auto h-[calc(100vh-80px)]">
               {/* Decorative circles */}
               <motion.div
                 animate={{

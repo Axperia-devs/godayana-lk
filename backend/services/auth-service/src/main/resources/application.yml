@@ -1,0 +1,52 @@
+server:
+  port: 8081
+
+spring:
+  config:
+    import: classpath:application-common.yml
+  application:
+    name: auth-service
+  datasource:
+    url: ${AUTH_DB_URL:jdbc:postgresql://localhost:5432/auth_db}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: ${SHOW_SQL:true}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: false  # Temporarily disable validation
+    repair: true  # Auto-repair on startup
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+
+otp:
+  service:
+    url: ${OTP_SERVICE_URL:http://localhost:8090}
+
+notification:
+  service:
+    url: ${NOTIFICATION_SERVICE_URL:http://localhost:8089}
+
+user:
+  service:
+    url: ${USER_SERVICE_URL:http://localhost:8082}
+
+logging:
+  level:
+    com.godayana: DEBUG
+
+eureka:
+  client:
+    enabled: false  # Disable Eureka for local development
+    register-with-eureka: false
+    fetch-registry: false

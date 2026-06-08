@@ -1,0 +1,228 @@
+version: '3.8'
+
+networks:
+  godayana-network:
+    driver: bridge
+
+services:
+  # ============ DATABASES ============
+
+  postgres-auth:
+    image: postgres:15
+    container_name: godayana-postgres-auth
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: godayana
+      POSTGRES_PASSWORD: dev123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres-auth-data:/var/lib/postgresql/data
+    networks:
+      - godayana-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U godayana -d auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  postgres-otp:
+    image: postgres:15
+    container_name: godayana-postgres-otp
+    environment:
+      POSTGRES_DB: otp_db
+      POSTGRES_USER: godayana
+      POSTGRES_PASSWORD: dev123
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-otp-data:/var/lib/postgresql/data
+    networks:
+      - godayana-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U godayana -d otp_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  postgres-user:
+    image: postgres:15
+    container_name: godayana-postgres-user
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: godayana
+      POSTGRES_PASSWORD: dev123
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-user-data:/var/lib/postgresql/data
+    networks:
+      - godayana-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U godayana -d user_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  postgres-notification:
+    image: postgres:15
+    container_name: godayana-postgres-notification
+    environment:
+      POSTGRES_DB: notification_db
+      POSTGRES_USER: godayana
+      POSTGRES_PASSWORD: dev123
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres-notification-data:/var/lib/postgresql/data
+    networks:
+      - godayana-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U godayana -d notification_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============ SERVICES ============
+
+  otp-service:
+    build:
+      context: .
+      dockerfile: services/otp-service/Dockerfile
+    container_name: godayana-otp-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-otp:5432/otp_db
+      SPRING_DATASOURCE_USERNAME: godayana
+      SPRING_DATASOURCE_PASSWORD: dev123
+      SERVER_PORT: 8090
+      OTP_LENGTH: 6
+      OTP_EXPIRATION_MINUTES: 5
+    ports:
+      - "8090:8090"
+    networks:
+      - godayana-network
+    depends_on:
+      postgres-otp:
+        condition: service_healthy
+    restart: unless-stopped
+
+  user-service:
+    build:
+      context: .
+      dockerfile: services/user-service/Dockerfile
+    container_name: godayana-user-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/user_db
+      SPRING_DATASOURCE_USERNAME: godayana
+      SPRING_DATASOURCE_PASSWORD: dev123
+      SERVER_PORT: 8082
+    ports:
+      - "8082:8082"
+    networks:
+      - godayana-network
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: services/notification-service/Dockerfile
+    container_name: godayana-notification-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notification:5432/notification_db
+      SPRING_DATASOURCE_USERNAME: godayana
+      SPRING_DATASOURCE_PASSWORD: dev123
+      SERVER_PORT: 8089
+    ports:
+      - "8089:8089"
+    networks:
+      - godayana-network
+    depends_on:
+      postgres-notification:
+        condition: service_healthy
+    restart: unless-stopped
+
+  auth-service:
+    #build:
+      #context: ./
+      #dockerfile: services/auth-service/Dockerfile
+    image: auth-service:local
+    container_name: godayana-auth-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: godayana
+      SPRING_DATASOURCE_PASSWORD: dev123
+      SERVER_PORT: 8081
+      OTP_SERVICE_URL: http://otp-service:8090
+      USER_SERVICE_URL: http://user-service:8082
+      NOTIFICATION_SERVICE_URL: http://notification-service:8089
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    ports:
+      - "8081:8081"
+    networks:
+      - godayana-network
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      #otp-service:
+      #  condition: service_started
+      #user-service:
+      #  condition: service_started
+      #notification-service:
+      #  condition: service_started
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    container_name: godayana-api-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8080
+      AUTH_SERVICE_URL: http://auth-service:8081
+      OTP_SERVICE_URL: http://otp-service:8090
+      USER_SERVICE_URL: http://user-service:8082
+      NOTIFICATION_SERVICE_URL: http://notification-service:8089
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    ports:
+      - "8080:8080"
+    networks:
+      - godayana-network
+    depends_on:
+      auth-service:
+        condition: service_started
+      otp-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+    restart: unless-stopped
+
+  # ============ MAILHOG FOR EMAIL TESTING ============
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: godayana-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - godayana-network
+    restart: unless-stopped
+
+volumes:
+  postgres-auth-data:
+  postgres-otp-data:
+  postgres-user-data:
+  postgres-notification-data:

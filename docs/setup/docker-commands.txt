@@ -1,0 +1,24 @@
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes (reset databases)
+docker-compose down -v
+
+# Rebuild specific service
+docker-compose build auth-service
+docker-compose up -d auth-service
+
+# Restart specific service
+docker-compose restart auth-service
+
+# Execute command in container
+docker exec -it godayana-auth-service bash
+
+# Access PostgreSQL
+docker exec -it godayana-postgres-auth psql -U godayana -d auth_db
+
+# Check resource usage
+docker stats
+
+# View container details
+docker inspect godayana-auth-service
