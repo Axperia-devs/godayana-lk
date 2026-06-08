@@ -91,6 +91,7 @@ Go to your GitHub repository → Settings → Secrets and variables → Actions 
 | `DOCKER_USERNAME` | Your Docker Hub username |
 | `DOCKER_PASSWORD` | Your Docker Hub access token |
 | `RAILWAY_API_TOKEN` | Your Railway API token |
+| `RAILWAY_PROJECT_ID` | Your Railway Project ID |
 | `AUTH_DB_PASSWORD` | Secure password for auth database |
 | `USER_DB_PASSWORD` | Secure password for user database |
 | `OTP_DB_PASSWORD` | Secure password for OTP database |
