@@ -45,7 +45,7 @@ jobs:
           OTP_DB_PASSWORD: ${{ secrets.OTP_DB_PASSWORD }}
         run: |
           echo "Linking to project..."
-          railway link
+          railway link "$RAILWAY_PROJECT_ID"
     
           # Deploy Auth Database
           if ! railway service list 2>/dev/null | grep -q "postgres-auth"; then
