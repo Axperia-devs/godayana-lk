@@ -24,8 +24,18 @@ jobs:
 
       - name: Install Railway CLI
         run: |
-          curl -fsSL https://railway.com/install.sh | bash
-          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+          # Remove old version if exists
+          rm -f ~/.railway/bin/railway
+          rm -f /usr/local/bin/railway
+
+          # Download the latest version
+          curl -L https://github.com/railwayapp/cli/releases/latest/download/railway-v5.5.0-x86_64-unknown-linux-gnu.tar.gz -o /tmp/railway.tar.gz
+          tar -xzf /tmp/railway.tar.gz -C /tmp
+          sudo mv /tmp/railway-v5.5.0-x86_64-unknown-linux-gnu/railway /usr/local/bin/railway
+          sudo chmod +x /usr/local/bin/railway
+    
+          #curl -fsSL https://railway.com/install.sh | bash
+          #echo "$HOME/.railway/bin" >> $GITHUB_PATH
 
       - name: Verify Railway CLI installation
         run: |
