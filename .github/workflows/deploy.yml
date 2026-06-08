@@ -44,14 +44,7 @@ jobs:
           AUTH_DB_PASSWORD: ${{ secrets.AUTH_DB_PASSWORD }}
           USER_DB_PASSWORD: ${{ secrets.USER_DB_PASSWORD }}
           OTP_DB_PASSWORD: ${{ secrets.OTP_DB_PASSWORD }}
-        run: |
-          echo "Token length: ${#RAILWAY_TOKEN}"
-          railway login
-          railway whoami
-          
-          echo "Linking to project..."
-          railway link --project "$RAILWAY_PROJECT_ID"
-          
+        run: |          
           # Deploy Auth Database
           if ! railway service list 2>/dev/null | grep -q "postgres-auth"; then
             echo "📦 Creating postgres-auth database..."
