@@ -50,11 +50,11 @@ jobs:
           if [ -z "$RAILWAY_PROJECT_ID" ]; then
             echo "⚠️ RAILWAY_PROJECT_ID not set, will try to link by name"
           else
-            echo "✅ RAILWAY_PROJECT_ID is set, length: ${#RAILWAY_PROJECT_ID}, value: '${RAILWAY_PROJECT_ID}'"
+            echo "✅ RAILWAY_PROJECT_ID is set"
           fi
 
           if [ -n "$RAILWAY_PROJECT_ID" ]; then
-            railway link $RAILWAY_PROJECT_ID
+            railway --project "$RAILWAY_PROJECT_ID"
           else
             echo "No project ID found, trying to link by name..."
             railway link --project godayana || true
