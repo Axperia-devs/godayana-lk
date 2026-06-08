@@ -1,0 +1,10 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "cd ../.. && ./mvnw clean package -DskipTests -pl services/api-gateway -am"
+
+[deploy]
+startCommand = "java -jar target/api-gateway.jar"
+healthcheckPath = "/actuator/health"
+
+[env]
+PORT = "8080"

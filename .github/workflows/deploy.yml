@@ -23,15 +23,33 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Railway CLI
-        run: npm install -g @railway/cli
+        if: matrix.service.enabled == 'true'
+        run: |
+          curl -fsSL https://railway.com/install.sh | sh
+          # Add to PATH
+          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+      
+      - name: Verify Railway CLI installation
+        run: railway --version
 
       - name: Deploy databases (only if not exist)
         env:
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
           AUTH_DB_PASSWORD: ${{ secrets.AUTH_DB_PASSWORD }}
           USER_DB_PASSWORD: ${{ secrets.USER_DB_PASSWORD }}
           OTP_DB_PASSWORD: ${{ secrets.OTP_DB_PASSWORD }}
         run: |
+          # Login and link to project
+          railway login --token $RAILWAY_API_TOKEN
+
+          if [ -n "$RAILWAY_PROJECT_ID" ]; then
+            railway link $RAILWAY_PROJECT_ID
+          else
+            echo "No project ID found, trying to link by name..."
+            railway link --project godayana-production || true
+          fi
+          
           # Check and deploy Auth Database
           if ! railway service list | grep -q "postgres-auth"; then
             echo "Creating postgres-auth database..."
