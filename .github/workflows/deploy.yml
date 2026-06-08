@@ -44,7 +44,13 @@ jobs:
           AUTH_DB_PASSWORD: ${{ secrets.AUTH_DB_PASSWORD }}
           USER_DB_PASSWORD: ${{ secrets.USER_DB_PASSWORD }}
           OTP_DB_PASSWORD: ${{ secrets.OTP_DB_PASSWORD }}
-        run: |          
+        run: |     
+          # Or try without any arguments
+          railway link || true
+          
+          # Now check if we're linked
+          railway whoami || echo "Not logged in"
+          
           # Deploy Auth Database
           if ! railway service list 2>/dev/null | grep -q "postgres-auth"; then
             echo "📦 Creating postgres-auth database..."
