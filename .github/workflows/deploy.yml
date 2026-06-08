@@ -30,7 +30,9 @@ jobs:
           echo "$HOME/.railway/bin" >> $GITHUB_PATH
 
       - name: Verify Railway CLI installation
-        run: railway --version
+        run: |
+          which railway
+          railway --version
 
       - name: Deploy databases (only if not exist)
         env:
