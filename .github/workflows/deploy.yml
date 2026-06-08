@@ -44,55 +44,45 @@ jobs:
           USER_DB_PASSWORD: ${{ secrets.USER_DB_PASSWORD }}
           OTP_DB_PASSWORD: ${{ secrets.OTP_DB_PASSWORD }}
         run: |
-          # Debug: Check if variables are set
-          echo "Checking Railway configuration..."
-          if [ -z "$RAILWAY_TOKEN" ]; then
-            echo "❌ ERROR: RAILWAY_TOKEN is not set"
-            exit 1
-          fi
+          PROJECT_ID="$RAILWAY_PROJECT_ID"
           
-          if [ -z "$RAILWAY_PROJECT_ID" ]; then
-            echo "⚠️ RAILWAY_PROJECT_ID not set, will try to link by name"
-          else
-            echo "✅ RAILWAY_PROJECT_ID is set"
-          fi
-
-          if [ -n "$RAILWAY_PROJECT_ID" ]; then
-            railway --project $RAILWAY_PROJECT_ID
-          else
-            echo "No project ID found, trying to link by name..."
-            railway link --project godayana || true
-          fi
-          
-          # Check and deploy Auth Database
-          if ! railway service list | grep -q "postgres-auth"; then
-            echo "Creating postgres-auth database..."
-            railway up --service postgres-auth
-            railway variables --service postgres-auth set POSTGRES_PASSWORD=$AUTH_DB_PASSWORD
+          # Deploy Auth Database
+          echo "Checking postgres-auth..."
+          if ! railway service list --project "$PROJECT_ID" 2>/dev/null | grep -q "postgres-auth"; then
+            echo "📦 Creating postgres-auth database..."
+            railway up --project "$PROJECT_ID" --service postgres-auth --template postgresql
+            sleep 10
+            railway variables --project "$PROJECT_ID" --service postgres-auth set POSTGRES_PASSWORD="$AUTH_DB_PASSWORD"
             echo "✅ postgres-auth created"
           else
             echo "✅ postgres-auth already exists - skipping"
           fi
           
-          # Check and deploy User Database
-          if ! railway service list | grep -q "postgres-user"; then
-            echo "Creating postgres-user database..."
-            railway up --service postgres-user
-            railway variables --service postgres-user set POSTGRES_PASSWORD=$USER_DB_PASSWORD
+          # Deploy User Database
+          echo "Checking postgres-user..."
+          if ! railway service list --project "$PROJECT_ID" 2>/dev/null | grep -q "postgres-user"; then
+            echo "📦 Creating postgres-user database..."
+            railway up --project "$PROJECT_ID" --service postgres-user --template postgresql
+            sleep 10
+            railway variables --project "$PROJECT_ID" --service postgres-user set POSTGRES_PASSWORD="$USER_DB_PASSWORD"
             echo "✅ postgres-user created"
           else
             echo "✅ postgres-user already exists - skipping"
           fi
           
-          # Check and deploy OTP Database
-          if ! railway service list | grep -q "postgres-otp"; then
-            echo "Creating postgres-otp database..."
-            railway up --service postgres-otp
-            railway variables --service postgres-otp set POSTGRES_PASSWORD=$OTP_DB_PASSWORD
+          # Deploy OTP Database
+          echo "Checking postgres-otp..."
+          if ! railway service list --project "$PROJECT_ID" 2>/dev/null | grep -q "postgres-otp"; then
+            echo "📦 Creating postgres-otp database..."
+            railway up --project "$PROJECT_ID" --service postgres-otp --template postgresql
+            sleep 10
+            railway variables --project "$PROJECT_ID" --service postgres-otp set POSTGRES_PASSWORD="$OTP_DB_PASSWORD"
             echo "✅ postgres-otp created"
           else
             echo "✅ postgres-otp already exists - skipping"
           fi
+          
+          echo "🎉 Database deployment check completed!"
 
   # ============ DETECT CHANGED SERVICES ============
   detect-changes:
