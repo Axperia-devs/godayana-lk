@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Build ONLY this specific service + its dependencies
-RUN mvn clean package -pl :auth-service -am -DskipTests
+RUN mvn clean package -pl services/auth-service -am -DskipTests
 
 # Stage 2: Run
 FROM eclipse-temurin:17-jre-alpine
@@ -18,7 +18,7 @@ RUN addgroup -S spring && adduser -S spring -G spring
 WORKDIR /app
 
 # Copy the built JAR
-COPY --from=builder /app/auth-service/target/*.jar app.jar
+COPY --from=builder /app/services/auth-service/target/*.jar app.jar
 
 USER spring:spring
 
