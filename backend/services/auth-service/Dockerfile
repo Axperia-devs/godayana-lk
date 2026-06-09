@@ -1,10 +1,23 @@
+# Stage 1: Build
+FROM maven:3.9-eclipse-temurin-17 AS builder
+
+WORKDIR /app
+
+# Copy entire monorepo (needed for parent POM + common modules)
+COPY . .
+
+# Build ONLY this specific service + its dependencies
+RUN mvn clean package -pl :auth-service -am -DskipTests
+
+# Stage 2: Run
 FROM eclipse-temurin:17-jre-alpine
 
 RUN addgroup -S spring && adduser -S spring -G spring
 
 WORKDIR /app
 
-COPY target/*.jar app.jar
+# Copy the built JAR
+COPY --from=builder /app/auth-service/target/*.jar app.jar
 
 USER spring:spring
 
