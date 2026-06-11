@@ -40,6 +40,8 @@ const navItems: NavItem[] = [
   { name: "Profile", href: "/company/profile", icon: User },
   { name: "Jobs", href: "/company/jobs", icon: Briefcase },
   { name: "Applications", href: "/company/applications", icon: FileText },
+  { name: "Courses", href: "/company/courses", icon: Heart },
+  { name: "Lead", href: "/company/lead", icon: FileText },
   { name: "Payments", href: "/company/payments", icon: Coins },
 ];
 
@@ -54,10 +56,7 @@ export default function CompanyLayout({
   const [redirectMessage, setRedirectMessage] = useState("");
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
-  const parentPath =
-    segments.length > 2
-      ? "/" + segments.slice(0, -1).join("/")
-      : "/" + segments.slice(0, 2).join("/");
+  const parentPath = "/" + segments.slice(0, 2).join("/");
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuth();
   const hasRedirected = useRef(false);
@@ -150,8 +149,12 @@ export default function CompanyLayout({
         return "Company Profile";
       case "Jobs":
         return "Jobs Management";
+      case "Courses":
+        return "Courses Management";
       case "Applications":
         return "Job Applications";
+      case "Lead":
+        return "Lead Management";
       case "Payments":
         return "Payments History";
     }

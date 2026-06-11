@@ -3,11 +3,11 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { CourseDetailsView } from "@/components/courses/CourseDetailsView";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { CourseDetailsView } from "@/components/courses/CourseDetailsView";
 
 // Define the CourseDetails interface
 interface CourseDetails {
@@ -252,24 +252,17 @@ export default function CourseDetailsPage() {
   if (loading) {
     return (
       <div className="space-y-2">
-        <div className="pl-8 pt-6 pb-2">
+        <div className="flex items-center gap-4 pb-4 border-b">
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={() => router.back()}
-            className="p-0 flex items-center gap-4 justify-center cursor-pointer hover:bg-transparent group"
+            className="bg-primary/10 rounded-full h-8 w-8 p-0 flex items-center justify-center hover:bg-primary/20 cursor-pointer"
           >
-            <div className="bg-primary/10 hover:bg-primary/20 p-2 rounded-full transition-all duration-300 group-hover:scale-110">
-              <ArrowLeft
-                className="text-primary"
-                style={{ width: "20px", height: "20px" }}
-              />
-            </div>
-            <h2 className="text-xl font-semibold text-primary group-hover:text-primary/80 transition-colors">
-              Back
-            </h2>
+            <ArrowLeft size={16} />
           </Button>
+          <h2 className="text-xl font-bold">View Course Details</h2>
         </div>
 
         <div className="space-y-6 p-4">
@@ -288,24 +281,17 @@ export default function CourseDetailsPage() {
   if (!course) {
     return (
       <div className="space-y-2">
-        <div className="pl-8 pt-6 pb-2">
+        <div className="flex items-center gap-4 pb-4 border-b">
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={() => router.back()}
-            className="p-0 flex items-center gap-4 justify-center cursor-pointer hover:bg-transparent group"
+            className="bg-primary/10 rounded-full h-8 w-8 p-0 flex items-center justify-center hover:bg-primary/20 cursor-pointer"
           >
-            <div className="bg-primary/10 hover:bg-primary/20 p-2 rounded-full transition-all duration-300 group-hover:scale-110">
-              <ArrowLeft
-                className="text-primary"
-                style={{ width: "20px", height: "20px" }}
-              />
-            </div>
-            <h2 className="text-xl font-semibold text-primary group-hover:text-primary/80 transition-colors">
-              Back
-            </h2>
+            <ArrowLeft size={16} />
           </Button>
+          <h2 className="text-xl font-bold">View Course Details</h2>
         </div>
         <div className="text-center py-12">
           <p className="text-muted-foreground">Course not found</p>
@@ -316,27 +302,20 @@ export default function CourseDetailsPage() {
 
   return (
     <div className="space-y-2">
-      <div className="pl-8 pt-6 pb-2">
+      <div className="flex items-center gap-4 pb-4 border-b">
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={() => router.back()}
-          className="p-0 flex items-center gap-4 justify-center cursor-pointer hover:bg-transparent group"
+          className="bg-primary/10 rounded-full h-8 w-8 p-0 flex items-center justify-center hover:bg-primary/20 cursor-pointer"
         >
-          <div className="bg-primary/10 hover:bg-primary/20 p-2 rounded-full transition-all duration-300 group-hover:scale-110">
-            <ArrowLeft
-              className="text-primary"
-              style={{ width: "20px", height: "20px" }}
-            />
-          </div>
-          <h2 className="text-xl font-semibold text-primary group-hover:text-primary/80 transition-colors">
-            Back
-          </h2>
+          <ArrowLeft size={16} />
         </Button>
+        <h2 className="text-xl font-bold">View Course Details</h2>
       </div>
 
-      <div className="px-4 md:px-16 pt-2 pb-16">
+      <div className="bg-primary/4 rounded-4xl p-4 border border-primary/14">
         <CourseDetailsView course={course} />
       </div>
     </div>

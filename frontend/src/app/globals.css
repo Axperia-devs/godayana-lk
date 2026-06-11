@@ -474,3 +474,36 @@
 .font-fm-gamunu {
   font-family: 'Gemunu Libre', 'Maname', 'Noto Sans Sinhala', serif;
 }
+
+/* Left Sidebar Scrollbar - Only for the left navigation */
+.sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(50.572% 0.14305 259.454 / 0.2) transparent;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+/* Force primary color for sidebar scrollbar */
+[class*="sidebar-scrollbar"] {
+  scrollbar-color: oklch(50.572% 0.14305 259.454 / 0.2) transparent !important;
+}
+
+[class*="sidebar-scrollbar"]::-webkit-scrollbar {
+  width: 4px !important;
+}
+
+[class*="sidebar-scrollbar"]::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+[class*="sidebar-scrollbar"]::-webkit-scrollbar-thumb {
+  background: oklch(50.572% 0.14305 259.454 / 0.2) !important;
+  /* Replace with your primary color */
+  border-radius: 10px !important;
+}
+
+[class*="sidebar-scrollbar"]::-webkit-scrollbar-thumb:hover {
+  background: oklch(50.572% 0.14305 259.454 / 0.4) !important;
+}
