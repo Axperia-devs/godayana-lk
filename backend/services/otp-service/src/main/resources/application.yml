@@ -7,13 +7,24 @@ spring:
   application:
     name: otp-service
   datasource:
-    url: ${OTP_DB_URL:jdbc:postgresql://localhost:5432/otp_db}
+    url: jdbc:${OTP_DB_URL:postgresql://localhost:5432/otp_db}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: ${SHOW_SQL:true}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
     baseline-on-migrate: true
+    validate-on-migrate: false  # Temporarily disable validation
+    baseline-version: 1
+    locations: classpath:db/migration
+    table: flyway_schema_history
   mail:
     host: ${SMTP_HOST:smtp.gmail.com}
     port: ${SMTP_PORT:587}

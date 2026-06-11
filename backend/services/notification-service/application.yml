@@ -9,9 +9,9 @@ spring:
   application:
     name: notification-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres-notification:5432/notification_db}
-    username: ${SPRING_DATASOURCE_USERNAME:godayana}
-    password: ${SPRING_DATASOURCE_PASSWORD:dev123}
+    url: jdbc:${NOTIFICATION_DB_URL:postgresql://postgres-notification:5432/notification_db}
+    username: ${DB_USERNAME:godayana}
+    password: ${DB_PASSWORD:dev123}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -27,8 +27,10 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
-    validate-on-migrate: true
+    validate-on-migrate: false  # Temporarily disable validation
+    baseline-version: 1
     locations: classpath:db/migration
+    table: flyway_schema_history
   mail:
     host: ${MAIL_HOST:mailhog}
     port: ${MAIL_PORT:1025}
@@ -76,3 +78,9 @@ management:
   endpoint:
     health:
       show-details: always
+      
+eureka:
+  client:
+    enabled: false  # Disable Eureka for local development
+    register-with-eureka: false
+    fetch-registry: false

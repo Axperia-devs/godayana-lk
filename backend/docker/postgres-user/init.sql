@@ -5,10 +5,12 @@ SET timezone = 'UTC';
 
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'godayana') THEN
-        CREATE USER godayana WITH PASSWORD COALESCE(current_setting('POSTGRES_PASSWORD', true), 'dev123');
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '${POSTGRES_USER}') THEN
+        CREATE USER '${POSTGRES_USER}' WITH PASSWORD '${POSTGRES_PASSWORD}';
     END IF;
 END
 $$;
 
-GRANT ALL PRIVILEGES ON DATABASE user_db TO godayana;
+GRANT ALL PRIVILEGES ON DATABASE '${POSTGRES_DB}' TO '${POSTGRES_USER}';
+
+ALTER DATABASE '${POSTGRES_DB}' SET search_path TO public, user;

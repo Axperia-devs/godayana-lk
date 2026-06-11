@@ -1,5 +1,6 @@
 package com.godayana.gateway.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -12,10 +13,20 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
+    @Value("${cors.allowed.origins}")
+    private String allowedOrigins;
+
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080"));
+
+        // Split and trim whitespace
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .toList();
+                
+        corsConfig.setAllowedOrigins(origins);
+
         corsConfig.setMaxAge(3600L);
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         corsConfig.setAllowedHeaders(List.of("*"));
