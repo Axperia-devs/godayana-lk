@@ -127,6 +127,45 @@ export function JobDetailsView({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:pr-10">
         {/* LEFT CONTENT */}
         <div className="lg:col-span-3 space-y-6">
+          <div className="bg-card rounded-xl shadow-xl overflow-visible md:sticky md:top-40 z-12 border py-2 md:hidden sticky top-14 mb-2">
+            <div className="px-4 py-2 space-y-4">
+              <div className="space-y-3">
+                {/* ACTION BUTTONS */}
+                <Button
+                  onClick={handleApply}
+                  className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-semibold"
+                  size="lg"
+                >
+                  APPLY FOR JOB
+                </Button>
+
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={handleSave}
+                    className="flex-1 gap-2"
+                  >
+                    {saved ? (
+                      <BookmarkCheck size={16} className="text-primary" />
+                    ) : (
+                      <Bookmark size={16} />
+                    )}
+                    {saved ? "Saved" : "Save Job"}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={handleShare}
+                    className="flex-1 gap-2"
+                  >
+                    <Share2 size={16} />
+                    Share
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* DESCRIPTION */}
           <div className=" rounded-xl p-6">
             <h2 className="text-xl font-bold mb-4 uppercase text-primary">
@@ -275,21 +314,30 @@ export function JobDetailsView({
         </div>
 
         {/* SIDEBAR */}
-        <div className="mt-10 lg:mt-0 lg:col-span-1 space-y-6 -top-20 lg:relative order-first lg:order-last ">
+        <div className="lg:col-span-1 -top-16 md:-top-44 relative order-first lg:order-last hidden md:block">
           {/* MAIN APPLICATION CARD */}
-          <Card className="relative rounded-xl shadow-xl overflow-visible">
-            <CardContent className="px-6 py-2 space-y-4">
+          <div className="bg-card shadow-xl rounded-t-xl overflow-visible relative top-24 pb-40 border">
+            <div className="px-6 py-2 space-y-4">
               {/* LOGO + TITLE */}
               <div className="w-30 h-30 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center text-white font-bold text-xl absolute -top-10 shadow-xl z-10">
                 {job.company.charAt(0).toUpperCase()}
               </div>
-              <div className="mt-14 pt-4 pb-2 bg-card border-b">
+            </div>
+          </div>
+
+          <div className="bg-card border-l border-r relative md:sticky md:top-18 z-1 py-2">
+            <div className="px-6 py-2 space-y-4">
+              <div className="pb-2 border-b">
                 <h3 className="font-bold text-lg">{job.title}</h3>
                 <p className="text-sm text-muted-foreground">
                   {job.company} - {job.location}
                 </p>
               </div>
+            </div>
+          </div>
 
+          <div className="bg-card relative shadow-xl overflow-visible border-l border-r">
+            <div className="px-6 py-2 space-y-4">
               {/* META INFO */}
               <div className="text-sm space-y-2 text-muted-foreground">
                 <div className="flex items-center gap-2">
@@ -339,7 +387,7 @@ export function JobDetailsView({
               </div>
 
               {/* STATS */}
-              <div className="grid grid-cols-2 gap-3 pt-2">
+              <div className="grid grid-cols-2 gap-3 py-2 border-b">
                 <div className="text-center p-2 bg-muted/30 rounded-lg">
                   <Eye size={16} className="mx-auto mb-1 text-primary" />
                   <p className="text-lg font-bold">{job.views || 0}</p>
@@ -351,7 +399,11 @@ export function JobDetailsView({
                   <p className="text-xs text-muted-foreground">Applicants</p>
                 </div>
               </div>
+            </div>
+          </div>
 
+          <div className="bg-card rounded-b-xl shadow-xl overflow-visible md:sticky md:top-40 z-12 border-l border-r border-b pb-2">
+            <div className="px-6 py-2 space-y-4">
               <div className="space-y-3">
                 {/* ACTION BUTTONS */}
                 <Button
@@ -386,11 +438,11 @@ export function JobDetailsView({
                   </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* COMPANY INFO CARD */}
-          <Card className="rounded-xl shadow-sm">
+          <Card className="rounded-xl shadow-sm my-8">
             <CardContent className="p-5">
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <Building2 size={16} className="text-primary" />

@@ -201,17 +201,17 @@ export function CourseDetailsView({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:pr-10">
         {/* LEFT CONTENT */}
         <div className="lg:col-span-3 space-y-6">
-          {/* Mobile Sticky Bar */}
-          <div className="bg-card rounded-xl shadow-xl overflow-visible md:sticky md:top-40 z-12 border py-2 md:hidden sticky top-14 mb-2">
-            <div className="px-4 py-2 space-y-4">
-              <div className="space-y-3">
+          {/* Mobile Sticky Bar - FIXED: Changed to match JobDetailsView pattern */}
+          <div className="md:hidden block sticky top-14">
+            <div className="bg-card rounded-xl shadow-xl border py-2 mb-4">
+              <div className="px-4 py-2 space-y-3">
                 <Button
                   onClick={handleEnroll}
                   disabled={isFull}
                   className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold"
                   size="lg"
                 >
-                  {isFull ? "Course Full" : "Enroll Now"}
+                  {isFull ? "Course Full" : "ENROLL NOW"}
                 </Button>
 
                 <div className="flex gap-3">
@@ -243,10 +243,10 @@ export function CourseDetailsView({
 
           {/* Tabs */}
           <div className="border-b">
-            <div className="flex gap-6">
+            <div className="flex gap-6 overflow-x-auto">
               <button
                 onClick={() => setActiveTab("overview")}
-                className={`pb-3 px-1 font-medium transition-colors ${
+                className={`pb-3 px-1 font-medium transition-colors whitespace-nowrap ${
                   activeTab === "overview"
                     ? "border-b-2 border-primary text-primary"
                     : "text-muted-foreground hover:text-foreground"
@@ -256,7 +256,7 @@ export function CourseDetailsView({
               </button>
               <button
                 onClick={() => setActiveTab("curriculum")}
-                className={`pb-3 px-1 font-medium transition-colors ${
+                className={`pb-3 px-1 font-medium transition-colors whitespace-nowrap ${
                   activeTab === "curriculum"
                     ? "border-b-2 border-primary text-primary"
                     : "text-muted-foreground hover:text-foreground"
@@ -266,7 +266,7 @@ export function CourseDetailsView({
               </button>
               <button
                 onClick={() => setActiveTab("instructor")}
-                className={`pb-3 px-1 font-medium transition-colors ${
+                className={`pb-3 px-1 font-medium transition-colors whitespace-nowrap ${
                   activeTab === "instructor"
                     ? "border-b-2 border-primary text-primary"
                     : "text-muted-foreground hover:text-foreground"
@@ -276,7 +276,7 @@ export function CourseDetailsView({
               </button>
               <button
                 onClick={() => setActiveTab("reviews")}
-                className={`pb-3 px-1 font-medium transition-colors ${
+                className={`pb-3 px-1 font-medium transition-colors whitespace-nowrap ${
                   activeTab === "reviews"
                     ? "border-b-2 border-primary text-primary"
                     : "text-muted-foreground hover:text-foreground"
@@ -475,10 +475,46 @@ export function CourseDetailsView({
           )}
         </div>
 
-        {/* SIDEBAR */}
-        <div className="lg:col-span-1 -top-16 md:-top-44 relative order-first lg:order-last hidden md:block">
-          {/* Main Enrollment Card */}
-          <div className="bg-card shadow-xl rounded-t-xl overflow-visible relative top-24 pb-40 border">
+        {/* SIDEBAR - Desktop Only - FIXED: Removed conflicting sticky elements */}
+        <div className="lg:col-span-1 hidden md:block md:-top-50 relative">
+          {/* Desktop Sticky Actions - Top */}
+          <div className="md:sticky md:top-22 z-12 pb-2">
+            <div className="flex w-full gap-3 justify-between items-center px-2">
+              <Button
+                onClick={handleEnroll}
+                disabled={isFull}
+                className="px-6 bg-primary hover:bg-primary/80 cursor-pointer text-white font-semibold"
+                size="lg"
+              >
+                {isFull ? "COURSE FULL" : "ENROLL NOW"}
+              </Button>
+
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  onClick={handleSave}
+                  className="text-white h-8 w-8 cursor-pointer bg-primary rounded-full"
+                >
+                  {saved ? (
+                    <BookmarkCheck size={16} className="text-white" />
+                  ) : (
+                    <Bookmark size={16} />
+                  )}
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={handleShare}
+                  className="text-white h-8 w-8 cursor-pointer bg-primary rounded-full"
+                >
+                  <Share2 size={16} />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Course Card */}
+          <div className="bg-card shadow-xl rounded-t-xl overflow-visible relative top-20 pb-22 border">
             <div className="px-6 py-2 space-y-4">
               <div className="w-30 h-30 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center text-white font-bold text-xl absolute -top-10 shadow-xl z-10">
                 {course.title.charAt(0).toUpperCase()}
@@ -486,8 +522,8 @@ export function CourseDetailsView({
             </div>
           </div>
 
-          <div className="bg-card border-l border-r relative md:sticky md:top-18 z-1 py-2">
-            <div className="px-6 py-2 space-y-4">
+          <div className="bg-card border-l border-r border-b rounded-b-md relative md:sticky md:top-20 z-1 pt-12 pb-2">
+            <div className="px-6 pt-2 space-y-4">
               <div className="pb-2 border-b">
                 <h3 className="font-bold text-lg">{course.title}</h3>
                 <p className="text-sm text-muted-foreground">
@@ -497,10 +533,10 @@ export function CourseDetailsView({
             </div>
           </div>
 
-          <div className="bg-card relative shadow-xl overflow-visible border-l border-r">
-            <div className="px-6 py-2 space-y-4">
+          <div className="bg-card relative shadow-xl overflow-visible border-l border-r border-b rounded-b-md">
+            <div className="px-6 pb-2 pt-4 space-y-4">
               {/* Price */}
-              <div className="text-center py-3 border-b">
+              <div className="text-center py-2 border-b">
                 <p className="text-3xl font-bold text-primary">
                   {formatPrice(course.price)}
                 </p>
@@ -546,45 +582,6 @@ export function CourseDetailsView({
                   <Eye size={16} className="mx-auto mb-1 text-primary" />
                   <p className="text-lg font-bold">{course.views}</p>
                   <p className="text-xs text-muted-foreground">Views</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-card rounded-b-xl shadow-xl overflow-visible md:sticky md:top-40 z-12 border-l border-r border-b pb-2">
-            <div className="px-6 py-2 space-y-4">
-              <div className="space-y-3">
-                <Button
-                  onClick={handleEnroll}
-                  disabled={isFull}
-                  className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold"
-                  size="lg"
-                >
-                  {isFull ? "Course Full" : "Enroll Now"}
-                </Button>
-
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={handleSave}
-                    className="flex-1 gap-2"
-                  >
-                    {saved ? (
-                      <BookmarkCheck size={16} className="text-primary" />
-                    ) : (
-                      <Bookmark size={16} />
-                    )}
-                    {saved ? "Saved" : "Save"}
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    onClick={handleShare}
-                    className="flex-1 gap-2"
-                  >
-                    <Share2 size={16} />
-                    Share
-                  </Button>
                 </div>
               </div>
             </div>
