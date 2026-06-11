@@ -344,7 +344,7 @@ const locations = [
 
 // Animation Variants
 const fadeInUp: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 1, y: -20 },
   visible: {
     opacity: 1,
     y: 0,

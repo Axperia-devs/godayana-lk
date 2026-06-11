@@ -1,84 +1,104 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Sun, Moon, Laptop } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sun, Moon, Laptop } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
-type Theme = "light" | "dark" | "system"
+type Theme = "light" | "dark" | "system";
 
 export function ThemeSwitcher() {
-  const [theme, setTheme] = useState<Theme>("system")
-  const [mounted, setMounted] = useState(false)
+  const [theme, setTheme] = useState<Theme>("system");
+  const [mounted, setMounted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Define applyTheme before using it
   const applyTheme = (newTheme: Theme | "light" | "dark") => {
-    const root = document.documentElement
-    
+    const root = document.documentElement;
+
     if (newTheme === "dark") {
-      root.classList.add("dark")
+      root.classList.add("dark");
     } else if (newTheme === "light") {
-      root.classList.remove("dark")
+      root.classList.remove("dark");
     } else {
       // system
-      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+      const systemPrefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
       if (systemPrefersDark) {
-        root.classList.add("dark")
+        root.classList.add("dark");
       } else {
-        root.classList.remove("dark")
+        root.classList.remove("dark");
       }
     }
-  }
+  };
 
   // Initialize theme
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true)
-    
-    const savedTheme = localStorage.getItem("theme") as Theme | null
+    setMounted(true);
+
+    const savedTheme = localStorage.getItem("theme") as Theme | null;
     if (savedTheme) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTheme(savedTheme)
-      applyTheme(savedTheme)
+      setTheme(savedTheme);
+      applyTheme(savedTheme);
     } else {
-      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+      const systemPrefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTheme("system")
-      applyTheme(systemPrefersDark ? "dark" : "light")
+      setTheme("system");
+      applyTheme(systemPrefersDark ? "dark" : "light");
     }
-  }, [])
+  }, []);
 
   const handleThemeChange = (newTheme: Theme) => {
-    setTheme(newTheme)
-    localStorage.setItem("theme", newTheme)
-    
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+
     if (newTheme === "system") {
-      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-      applyTheme(systemPrefersDark ? "dark" : "light")
+      const systemPrefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      applyTheme(systemPrefersDark ? "dark" : "light");
     } else {
-      applyTheme(newTheme)
+      applyTheme(newTheme);
     }
-  }
+  };
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="rounded-full w-9 h-9 opacity-0">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="rounded-full w-9 h-9 opacity-0"
+      >
         <Sun className="h-4 w-4" />
       </Button>
-    )
+    );
   }
 
   const getIcon = () => {
-    if (theme === "light") return <Sun className="h-4 w-4" />
-    if (theme === "dark") return <Moon className="h-4 w-4" />
-    return <Laptop className="h-4 w-4" />
-  }
+    if (theme === "light") return <Sun className="h-4 w-4" />;
+    if (theme === "dark") return <Moon className="h-4 w-4" />;
+    return <Laptop className="h-4 w-4" />;
+  };
 
   return (
     <DropdownMenu modal={false}>
@@ -86,7 +106,7 @@ export function ThemeSwitcher() {
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full w-9 h-9 relative flex-shrink-0 text-muted-foreground hover:text-primary cursor-pointer"
+          className={`rounded-full w-9 h-9 relative flex-shrink-0 text-blue-800 dark:text-muted-foreground hover:text-blue-900 dark:hover:text-primary cursor-pointer hover:bg-primary/10 ${scrolled ? "text-muted-foreground hover:text-primary" : "text-blue-900 dark:text-muted-foreground hover:text-blue-950 dark:hover:text-primary"}`}
           aria-label="Toggle theme"
         >
           <AnimatePresence mode="wait" initial={false}>
