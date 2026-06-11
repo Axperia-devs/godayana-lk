@@ -91,8 +91,12 @@ export default function LoginClient() {
       const result = await login(formData.identifier, formData.password);
 
       if (result.success) {
-        toast.success("Login successful!");
-        router.push(redirectTo);
+        const toastId = toast.success("Login successful!");
+
+        setTimeout(() => {
+          toast.dismiss(toastId);
+          router.push(redirectTo);
+        }, 1000);
       } else {
         toast.error("Invalid credentials. Please try again.");
       }
