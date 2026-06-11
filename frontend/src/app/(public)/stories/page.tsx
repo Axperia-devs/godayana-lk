@@ -255,7 +255,7 @@ const storiesData = [
 
 // Animation Variants
 const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 1, y: -30 },
   visible: {
     opacity: 1,
     y: 0,

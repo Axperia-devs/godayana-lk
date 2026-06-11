@@ -265,7 +265,7 @@ export function Header() {
           "fixed top-0 w-full max-w-screen overflow-visible z-50 transition-all duration-300",
           scrolled
             ? "bg-background/80 backdrop-blur-md border-b shadow-sm"
-            : "bg-background border-b",
+            : "bg-blue-400 dark:bg-background ",
         )}
       >
         <nav className="px-4 sm:px-6 lg:px-8">
@@ -316,10 +316,14 @@ export function Header() {
                     <motion.div
                       whileHover={{ y: -2 }}
                       className={cn(
-                        "flex items-center text-sm font-medium transition-colors bg-primary/5 rounded-md px-3 py-1",
-                        isActive
-                          ? "text-primary"
-                          : "text-muted-foreground hover:text-primary",
+                        "flex items-center text-sm font-medium transition-colors  rounded-md px-3 py-1",
+                        scrolled
+                          ? isActive
+                            ? "text-primary bg-primary/5"
+                            : "text-muted-foreground hover:text-primary bg-primary/5"
+                          : isActive
+                            ? "text-blue-950 dark:text-primary bg-primary/10 dark:bg-primary/5"
+                            : "text-blue-900 dark:text-muted-foreground hover:text-blue-950 dark:hover:text-primary bg-primary/10 dark:bg-primary/5",
                       )}
                     >
                       <item.icon className="h-5 w-5 mr-2 shrink-0" />
@@ -434,7 +438,7 @@ export function Header() {
                       <Button
                         variant="ghost"
                         size="lg"
-                        className="text-muted-foreground hover:text-primary whitespace-nowrap cursor-pointer"
+                        className={`text-muted-foreground hover:text-primary whitespace-nowrap cursor-pointer hover:bg-primary/10 ${scrolled ? "text-muted-foreground hover:text-primary" : "text-blue-900 dark:text-muted-foreground hover:text-blue-950 dark:hover:text-primary"}`}
                       >
                         Login
                       </Button>

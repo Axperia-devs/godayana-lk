@@ -1,33 +1,63 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import Image from "next/image";
 import {
   BookOpen,
   Briefcase,
   Plane,
-  Clock,
-  DollarSign,
-  ChevronLeft,
-  ChevronRight,
   ArrowRight,
   AlertCircle,
   FileText,
-  Landmark,
-  Languages,
-  Heart,
-  Users,
   Globe,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useMobileNav } from "@/context/MobileNavContext";
 
+// Types
+interface VisaType {
+  id: number;
+  title: string;
+  sinhala: string;
+  description: string;
+  cost: string;
+  time: string;
+  icon: React.ElementType;
+  color: string;
+  bgColor: string;
+  country?: never;
+}
+
+interface VisaGuide {
+  id: number;
+  country: string;
+  title: string;
+  description: string;
+  documents: string[];
+  commonMistakes: string[];
+  cost: string;
+  processingTime: string;
+  image: string;
+  color: string;
+  flag: string;
+}
+
+interface FormData {
+  hasPassport: string;
+  countryPlanning: string;
+  otherCountry: string;
+  previousRejection: string;
+  targetTravelMonth: string;
+  targetTravelYear: string;
+  additionalNotes: string;
+}
+
 // Visa Types Data (Top Section)
-const visaTypes = [
+const visaTypes: VisaType[] = [
   {
     id: 1,
     title: "Student Visa",
@@ -64,7 +94,7 @@ const visaTypes = [
 ];
 
 // Visa Guides Data (Now as Cards)
-const visaGuides = [
+const visaGuides: VisaGuide[] = [
   {
     id: 1,
     country: "UK",
@@ -202,7 +232,7 @@ const visaGuides = [
 
 // Animation Variants
 const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 1, y: -30 },
   visible: {
     opacity: 1,
     y: 0,
@@ -231,27 +261,126 @@ const itemVariants = {
   },
 };
 
+// Country options for dropdown
+const countryOptions = [
+  "United Kingdom",
+  "Australia",
+  "Canada",
+  "USA",
+  "Germany",
+  "Japan",
+  "France",
+  "Italy",
+  "New Zealand",
+  "Ireland",
+  "Netherlands",
+  "Sweden",
+  "Other",
+];
+
 export default function VisaPage() {
   const { isMobileNavOpen } = useMobileNav();
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedVisa, setSelectedVisa] = useState<VisaType | VisaGuide | null>(
+    null,
+  );
+
+  // Form state
+  const [formData, setFormData] = useState<FormData>({
+    hasPassport: "",
+    countryPlanning: "",
+    otherCountry: "",
+    previousRejection: "",
+    targetTravelMonth: "",
+    targetTravelYear: new Date().getFullYear().toString(),
+    additionalNotes: "",
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  // Generate year options (current year to current year + 9)
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 10 }, (_, i) => currentYear + i);
+
+  const openPopup = (visa: VisaType | VisaGuide) => {
+    setSelectedVisa(visa);
+    setIsPopupOpen(true);
+    // Reset form when opening
+    setFormData({
+      hasPassport: "",
+      countryPlanning: "",
+      otherCountry: "",
+      previousRejection: "",
+      targetTravelMonth: "",
+      targetTravelYear: currentYear.toString(),
+      additionalNotes: "",
+    });
+    setSubmitSuccess(false);
+  };
+
+  const closePopup = () => {
+    setIsPopupOpen(false);
+    setSelectedVisa(null);
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // Prepare final country value
+    const finalCountry =
+      formData.countryPlanning === "Other"
+        ? formData.otherCountry
+        : formData.countryPlanning;
+
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    console.log("Consultation Request:", {
+      visaType: selectedVisa?.title,
+      country:
+        "country" in (selectedVisa || {})
+          ? selectedVisa?.country
+          : selectedVisa?.title,
+      selectedCountry: finalCountry,
+      hasPassport: formData.hasPassport,
+      previousRejection: formData.previousRejection,
+      targetTravelMonth: formData.targetTravelMonth,
+      targetTravelYear: formData.targetTravelYear,
+      additionalNotes: formData.additionalNotes,
+    });
+
+    setIsSubmitting(false);
+    setSubmitSuccess(true);
+
+    // Close popup after 2 seconds on success
+    setTimeout(() => {
+      closePopup();
+    }, 2000);
+  };
+
+  // Helper function to get display text for selected visa
+  const getVisaDisplayText = () => {
+    if (!selectedVisa) return "";
+    if ("country" in selectedVisa) {
+      return `${selectedVisa.title} - ${selectedVisa.country}`;
+    }
+    return selectedVisa.title;
+  };
 
   return (
     <div className="bg-background min-h-screen flex flex-col">
       {/* Header */}
-      {/* <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={fadeInUp}
-        className="py-8 mx-4 sm:mx-6 lg:mx-8"
-      >
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">
-          ගොඩයන
-          <span className="text-primary"> Visa</span>
-        </h1>
-        <p className="text-muted-foreground max-w-2xl">
-          Your comprehensive guide to global visa processes. We simplify the
-          complex documentation for you.
-        </p>
-      </motion.div> */}
       <motion.div
         initial="hidden"
         animate="visible"
@@ -288,7 +417,7 @@ export default function VisaPage() {
                   {/* Icon and Title */}
                   <div className="flex items-start gap-4 mb-4">
                     <div
-                      className={`w-12 h-12 rounded-xl bg-gradient-to-br ${visa.color} bg-opacity-10 flex items-center justify-center shrink-0`}
+                      className={`w-12 h-12 rounded-xl bg-linear-to-br ${visa.color} bg-opacity-10 flex items-center justify-center shrink-0`}
                     >
                       <visa.icon className="h-6 w-6 text-white" />
                     </div>
@@ -323,12 +452,13 @@ export default function VisaPage() {
 
                   {/* Book Consultation Button - Always at bottom */}
                   <div className="mt-auto pt-2">
-                    <Link href={`/visa/consultation/${visa.id}`}>
-                      <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer group">
-                        <span>Book Consultation</span>
-                        <ArrowRight className="h-4 w-4 ml-2 transition-transform group-hover:translate-x-1" />
-                      </Button>
-                    </Link>
+                    <Button
+                      onClick={() => openPopup(visa)}
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer group"
+                    >
+                      <span>Book Consultation</span>
+                      <ArrowRight className="h-4 w-4 ml-2 transition-transform group-hover:translate-x-1" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -348,7 +478,7 @@ export default function VisaPage() {
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            {visaGuides.map((guide, index) => (
+            {visaGuides.map((guide) => (
               <motion.div
                 key={guide.id}
                 variants={itemVariants}
@@ -368,7 +498,7 @@ export default function VisaPage() {
                       />
                     ) : (
                       <div
-                        className={`absolute inset-0 bg-gradient-to-br ${guide.color}`}
+                        className={`absolute inset-0 bg-linear-to-br ${guide.color}`}
                       >
                         <div className="absolute inset-0 bg-black/20" />
                         <div className="absolute inset-0 flex items-center justify-center">
@@ -468,28 +598,14 @@ export default function VisaPage() {
 
                     {/* Action Buttons */}
                     <div className="mt-auto space-y-2">
-                      {/* <Link href={`/visa/guide/${guide.id}`} className="block">
-                        <Button
-                          variant="outline"
-                          className="w-full cursor-pointer group"
-                          size="sm"
-                        >
-                          <span>View Full Guide</span>
-                          <ArrowRight className="h-3 w-3 ml-2 transition-transform group-hover:translate-x-1" />
-                        </Button>
-                      </Link> */}
-                      <Link
-                        href={`/visa/consultation/${guide.id}`}
-                        className="block"
+                      <Button
+                        onClick={() => openPopup(guide)}
+                        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer group"
+                        size="sm"
                       >
-                        <Button
-                          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer group"
-                          size="sm"
-                        >
-                          <span>View Full Guide</span>
-                          <ArrowRight className="h-3 w-3 ml-2 transition-transform group-hover:translate-x-1" />
-                        </Button>
-                      </Link>
+                        <span>View Full Guide</span>
+                        <ArrowRight className="h-3 w-3 ml-2 transition-transform group-hover:translate-x-1" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -498,6 +614,270 @@ export default function VisaPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* Consultation Popup Modal */}
+      <AnimatePresence>
+        {isPopupOpen && (
+          <>
+            {/* Backdrop with blur */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closePopup}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+            />
+
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="bg-background rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+                {/* Header */}
+                <div className="sticky top-0 bg-background border-b px-6 py-4 flex justify-between items-center">
+                  <div>
+                    <h2 className="text-xl font-bold">Book Consultation</h2>
+                    <p className="text-sm text-muted-foreground">
+                      {getVisaDisplayText()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={closePopup}
+                    className="p-1 rounded-full hover:bg-muted transition-colors"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                {/* Form */}
+                {submitSuccess ? (
+                  <div className="p-6 text-center">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg
+                        className="w-8 h-8 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">
+                      Request Sent!
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Our visa expert will contact you within 24 hours.
+                    </p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                    {/* Do you have a passport? */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Do you have a passport?{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="hasPassport"
+                            value="yes"
+                            checked={formData.hasPassport === "yes"}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 text-primary"
+                            required
+                          />
+                          <span>Yes</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="hasPassport"
+                            value="no"
+                            checked={formData.hasPassport === "no"}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 text-primary"
+                          />
+                          <span>No</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Which country are you planning for? */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Which country are you planning for?{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        name="countryPlanning"
+                        value={formData.countryPlanning}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                        required
+                      >
+                        <option value="">Select a country</option>
+                        {countryOptions.map((country) => (
+                          <option key={country} value={country}>
+                            {country}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Other Country Input - Shows when "Other" is selected */}
+                    <AnimatePresence>
+                      {formData.countryPlanning === "Other" && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <label className="block text-sm font-medium mb-2">
+                            Please specify country{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            name="otherCountry"
+                            value={formData.otherCountry}
+                            onChange={handleInputChange}
+                            placeholder="Enter country name"
+                            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                            required={formData.countryPlanning === "Other"}
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {/* Previous Visa Rejection? */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Previous Visa Rejection?{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="previousRejection"
+                            value="yes"
+                            checked={formData.previousRejection === "yes"}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 text-primary"
+                            required
+                          />
+                          <span>Yes</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="previousRejection"
+                            value="no"
+                            checked={formData.previousRejection === "no"}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 text-primary"
+                          />
+                          <span>No</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Target Travel Month & Year - Side by Side */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Target Travel Date{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {/* Month Selector */}
+                        <select
+                          name="targetTravelMonth"
+                          value={formData.targetTravelMonth}
+                          onChange={handleInputChange}
+                          className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                          required
+                        >
+                          <option value="">Select Month</option>
+                          <option value="January">January</option>
+                          <option value="February">February</option>
+                          <option value="March">March</option>
+                          <option value="April">April</option>
+                          <option value="May">May</option>
+                          <option value="June">June</option>
+                          <option value="July">July</option>
+                          <option value="August">August</option>
+                          <option value="September">September</option>
+                          <option value="October">October</option>
+                          <option value="November">November</option>
+                          <option value="December">December</option>
+                        </select>
+
+                        {/* Year Selector */}
+                        <select
+                          name="targetTravelYear"
+                          value={formData.targetTravelYear}
+                          onChange={handleInputChange}
+                          className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                          required
+                        >
+                          {yearOptions.map((year) => (
+                            <option key={year} value={year}>
+                              {year}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Additional Notes */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Additional Notes
+                      </label>
+                      <textarea
+                        name="additionalNotes"
+                        value={formData.additionalNotes}
+                        onChange={handleInputChange}
+                        rows={3}
+                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background resize-none"
+                        placeholder="Any specific questions or requirements..."
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                          Submitting...
+                        </>
+                      ) : (
+                        "Submit Consultation Request"
+                      )}
+                    </Button>
+                  </form>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

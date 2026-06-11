@@ -17,6 +17,7 @@ import {
   Search,
   Coins,
   BadgeCheck,
+  BookX,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
@@ -42,6 +43,7 @@ const navItems: NavItem[] = [
   { name: "Approval Management", href: "/admin/approvals", icon: BadgeCheck },
   { name: "Post Management", href: "/admin/posts", icon: FileText },
   { name: "Users & Companies", href: "/admin/users", icon: User },
+  { name: "Visa & Gateway Review", href: "/admin/visa-gateway", icon: BookX },
 ];
 
 export default function AdminLayout({
@@ -54,6 +56,8 @@ export default function AdminLayout({
   const [showRedirectMessage, setShowRedirectMessage] = useState(false);
   const [redirectMessage, setRedirectMessage] = useState("");
   const pathname = usePathname();
+  const segments = pathname.split("/").filter(Boolean);
+  const parentPath = "/" + segments.slice(0, 2).join("/");
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuth();
   const hasRedirected = useRef(false);
@@ -130,7 +134,7 @@ export default function AdminLayout({
   }
 
   const getTitle = () => {
-    const currentItem = navItems.find((item) => item.href === pathname);
+    const currentItem = navItems.find((item) => item.href === parentPath);
     switch (currentItem?.name) {
       case "Dashboard":
         return (
@@ -152,6 +156,8 @@ export default function AdminLayout({
         return "Content Management";
       case "Payment Management":
         return "Payment Management";
+      case "Visa & Gateway Review":
+        return "Visa & Gateway Review";
     }
   };
 
@@ -277,9 +283,9 @@ export default function AdminLayout({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto sidebar-scrollbar">
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = parentPath === item.href;
             return (
               <Link
                 key={item.name}

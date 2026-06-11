@@ -8,15 +8,13 @@ services:
   # ============ DATABASES ============
 
   postgres-auth:
-    image: postgres:15
-    container_name: godayana-postgres-auth
+    build: ./docker/postgres-auth
     environment:
       POSTGRES_DB: auth_db
       POSTGRES_USER: godayana
       POSTGRES_PASSWORD: dev123
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
     ports:
-      - "5436:5432"
+      - "5433:5432"
     volumes:
       - postgres-auth-data:/var/lib/postgresql/data
     networks:
@@ -29,14 +27,14 @@ services:
     restart: unless-stopped
 
   postgres-otp:
-    image: postgres:15
+    build: docker/postgres-otp  
     container_name: godayana-postgres-otp
     environment:
       POSTGRES_DB: otp_db
       POSTGRES_USER: godayana
       POSTGRES_PASSWORD: dev123
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
       - postgres-otp-data:/var/lib/postgresql/data
     networks:
@@ -49,14 +47,13 @@ services:
     restart: unless-stopped
 
   postgres-user:
-    image: postgres:15
-    container_name: godayana-postgres-user
+    build: docker/postgres-user
     environment:
       POSTGRES_DB: user_db
       POSTGRES_USER: godayana
       POSTGRES_PASSWORD: dev123
     ports:
-      - "5434:5432"
+      - "5435:5432"
     volumes:
       - postgres-user-data:/var/lib/postgresql/data
     networks:
@@ -69,14 +66,14 @@ services:
     restart: unless-stopped
 
   postgres-notification:
-    image: postgres:15
+    build: docker/postgres-notification
     container_name: godayana-postgres-notification
     environment:
       POSTGRES_DB: notification_db
       POSTGRES_USER: godayana
       POSTGRES_PASSWORD: dev123
     ports:
-      - "5435:5432"
+      - "5436:5432"
     volumes:
       - postgres-notification-data:/var/lib/postgresql/data
     networks:
@@ -88,6 +85,7 @@ services:
       retries: 5
     restart: unless-stopped
 
+
   # ============ SERVICES ============
 
   otp-service:
@@ -97,7 +95,7 @@ services:
     container_name: godayana-otp-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-otp:5432/otp_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-otp:5434/otp_db
       SPRING_DATASOURCE_USERNAME: godayana
       SPRING_DATASOURCE_PASSWORD: dev123
       SERVER_PORT: 8090
@@ -119,7 +117,7 @@ services:
     container_name: godayana-user-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/user_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5435/user_db
       SPRING_DATASOURCE_USERNAME: godayana
       SPRING_DATASOURCE_PASSWORD: dev123
       SERVER_PORT: 8082
@@ -139,7 +137,7 @@ services:
     container_name: godayana-notification-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notification:5432/notification_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notification:5436/notification_db
       SPRING_DATASOURCE_USERNAME: godayana
       SPRING_DATASOURCE_PASSWORD: dev123
       SERVER_PORT: 8089
@@ -153,14 +151,13 @@ services:
     restart: unless-stopped
 
   auth-service:
-    #build:
-      #context: ./
-      #dockerfile: services/auth-service/Dockerfile
-    image: auth-service:local
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
     container_name: godayana-auth-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/auth_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5433/auth_db
       SPRING_DATASOURCE_USERNAME: godayana
       SPRING_DATASOURCE_PASSWORD: dev123
       SERVER_PORT: 8081
@@ -196,6 +193,7 @@ services:
       USER_SERVICE_URL: http://user-service:8082
       NOTIFICATION_SERVICE_URL: http://notification-service:8089
       JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8080
     ports:
       - "8080:8080"
     networks:

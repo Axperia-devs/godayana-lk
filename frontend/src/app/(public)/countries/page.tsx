@@ -169,7 +169,7 @@ const countriesData = [
 
 // Animation Variants
 const fadeInUp: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 1, y: -30 },
   visible: {
     opacity: 1,
     y: 0,

@@ -1,23 +1,33 @@
-FROM openjdk:17-jdk-slim AS build
+# Stage 1: Build
+FROM maven:3.9-eclipse-temurin-17 AS builder
+#FROM eclipse-temurin:17-jre-alpine AS builder
+
 WORKDIR /app
 
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
-COPY common ../common/
-COPY services/notification-service/pom.xml services/notification-service/
+# Copy entire monorepo (needed for parent POM + common modules)
+COPY . .
 
-RUN ./mvnw dependency:go-offline -B
+# Build ONLY this specific service + its dependencies
+RUN mvn clean package -pl services/notification-service -am -DskipTests
 
-COPY services/notification-service/src services/notification-service/src
+# Stage 2: Run
+FROM eclipse-temurin:17-jre-alpine
 
-RUN ./mvnw clean package -DskipTests -pl services/notification-service -am
+RUN addgroup -S spring && adduser -S spring -G spring
 
-FROM openjdk:17-jdk-slim
 WORKDIR /app
 
-COPY --from=build /app/services/notification-service/target/*.jar app.jar
+# Copy the built JAR
+COPY --from=builder /app/services/notification-service/target/*.jar app.jar
+
+USER spring:spring
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:8089/actuator/health || exit 1
+
+ENTRYPOINT ["java", \
+    "-XX:+UseContainerSupport", \
+    "-XX:MaxRAMPercentage=75.0", \
+    "-jar", "app.jar"]
 
 EXPOSE 8089
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
