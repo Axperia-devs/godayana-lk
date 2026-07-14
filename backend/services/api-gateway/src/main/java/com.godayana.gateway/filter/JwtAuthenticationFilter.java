@@ -8,12 +8,16 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -21,9 +25,10 @@ import java.util.List;
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private final JwtUtil jwtUtil;
+    private final PathPatternParser patternParser = new PathPatternParser();
 
     // Public endpoints that don't require authentication
-    private static final List<String> PUBLIC_ENDPOINTS = List.of(
+    private final List<PathPattern> PUBLIC_ENDPOINTS = List.of(
             "/api/v1/auth/login",
             "/api/v1/auth/register",
             "/api/v1/auth/refresh",
@@ -33,27 +38,24 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/api/v1/jobs/public",
             "/api/v1/courses/public",
             "/api/v1/visa/public",
-            "/api/v1/stories/public"
-    );
+            "/api/v1/stories/public").stream().map(patternParser::parse).collect(Collectors.toList());
 
     // Admin only endpoints
-    private static final List<String> ADMIN_ENDPOINTS = List.of(
+    private final List<PathPattern> ADMIN_ENDPOINTS = List.of(
             "/api/v1/admin/**",
             "/api/v1/jobs/pending",
             "/api/v1/jobs/*/approve",
             "/api/v1/jobs/*/reject",
-            "/api/v1/users/admin/**"
-    );
+            "/api/v1/users/admin/**").stream().map(patternParser::parse).collect(Collectors.toList());
 
     // Company only endpoints
-    private static final List<String> COMPANY_ENDPOINTS = List.of(
+    private final List<PathPattern> COMPANY_ENDPOINTS = List.of(
             "/api/v1/jobs",
             "/api/v1/jobs/*",
             "/api/v1/jobs/*/close",
             "/api/v1/jobs/*/delete",
             "/api/v1/jobs/company",
-            "/api/v1/applications/job/*"
-    );
+            "/api/v1/applications/job/*").stream().map(patternParser::parse).collect(Collectors.toList());
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -76,13 +78,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         }
 
         String token = authHeader.substring(7);
-
-        // Check if token is blacklisted (revoked)
-//        if (tokenBlacklistService.isTokenBlacklisted(token)) {
-//            log.warn("Blacklisted token used for path: {}", path);
-//            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-//            return exchange.getResponse().setComplete();
-//        }
 
         // Validate token
         if (!jwtUtil.validateToken(token)) {
@@ -116,7 +111,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     private boolean isPublicEndpoint(String path) {
-        return PUBLIC_ENDPOINTS.stream().anyMatch(path::startsWith);
+        return PUBLIC_ENDPOINTS.stream().anyMatch(pattern -> pattern.matches(PathContainer.parsePath(path)));
     }
 
     private boolean hasPermission(String path, String role) {
@@ -127,7 +122,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         // Admin can access admin endpoints
         if ("ADMIN".equals(role)) {
-            if (ADMIN_ENDPOINTS.stream().anyMatch(path::matches)) {
+            if (ADMIN_ENDPOINTS.stream().anyMatch(pattern -> pattern.matches(PathContainer.parsePath(path)))) {
                 return true;
             }
             // Admin can also access company and seeker endpoints
@@ -136,7 +131,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         // Company permissions
         if ("COMPANY".equals(role)) {
-            if (COMPANY_ENDPOINTS.stream().anyMatch(path::matches)) {
+            if (COMPANY_ENDPOINTS.stream().anyMatch(pattern -> pattern.matches(PathContainer.parsePath(path)))) {
                 return true;
             }
             // Company can also access job list
@@ -149,8 +144,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             // Seeker can access seeker endpoints and view jobs
             return !path.startsWith("/api/v1/admin/") &&
                     !path.startsWith("/api/v1/company/") &&
-                    !path.startsWith("/api/v1/jobs") || path.startsWith("/api/v1/jobs?") ||
-                    path.startsWith("/api/v1/applications");
+                    !path.startsWith("/api/v1/jobs") &&
+                    !path.startsWith("/api/v1/applications");
         }
 
         return false;
