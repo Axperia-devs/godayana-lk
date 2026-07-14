@@ -14,8 +14,12 @@ import {
   Info,
   X,
 } from "lucide-react";
+import toast from "react-hot-toast";
+import { authAPI, RegisterRequest } from "@/lib/api/endpoints/authEndpoints";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [role, setRole] = useState<"seeker" | "company">("seeker");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -23,8 +27,8 @@ export default function RegisterPage() {
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [registrationData, setRegistrationData] = useState<RegisterRequest>({});
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -36,6 +40,14 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
   });
+
+  // Simple: if starts with 0, replace with +94
+  const formatPhoneNumber = (value: string): string => {
+    if (value.startsWith("0")) {
+      return "+94" + value.substring(1);
+    }
+    return value;
+  };
 
   // Validation functions
   const validateEmail = (email: string) => {
@@ -49,10 +61,11 @@ export default function RegisterPage() {
   };
 
   const validatePhone = (phone: string) => {
-    const phoneRegex =
-      /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
     if (!phone) return "Phone number is required";
-    if (!phoneRegex.test(phone)) return "Invalid phone number format";
+    // Accept both formats: +94XXXXXXXXX or 0XXXXXXXXX
+    const phoneRegex = /^(\+94|0)\d{9}$/;
+    if (!phoneRegex.test(phone))
+      return "Invalid phone number format (e.g., +94712345678 or 0712345678)";
     return "";
   };
 
@@ -103,7 +116,14 @@ export default function RegisterPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "phone") {
+      // Format phone number on the fly
+      const formattedPhone = formatPhoneNumber(value);
+      setFormData((prev) => ({ ...prev, [name]: formattedPhone }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
 
     // Clear error when user starts typing
     if (errors[name]) {
@@ -141,6 +161,32 @@ export default function RegisterPage() {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       const prevInput = document.getElementById(`otp-${index - 1}`);
       prevInput?.focus();
+    }
+  };
+
+  // Send OTP to backend
+  const sendOtp = async (userdata: RegisterRequest) => {
+    try {
+      const response = await authAPI.sendOtp(userdata);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to send OTP:", error);
+      throw error;
+    }
+  };
+
+  // Register user
+  const verifyOtpAndRegisterUser = async (
+    userData: RegisterRequest,
+    identifier: string,
+    otp: string,
+  ) => {
+    try {
+      const response = await authAPI.register(userData, identifier, otp);
+      return response.data;
+    } catch (error) {
+      console.error("Registration failed:", error);
+      throw error;
     }
   };
 
@@ -221,8 +267,55 @@ export default function RegisterPage() {
     });
 
     if (!hasError) {
-      // Show OTP modal
-      setShowOtpModal(true);
+      const loadingToast = toast.loading("Sending verification code...");
+
+      try {
+        // Clean phone number to +94 format for submission
+        let cleanPhone = formData.phone;
+        if (cleanPhone.startsWith("0")) {
+          cleanPhone = "+94" + cleanPhone.substring(1);
+        }
+
+        // Prepare registration data
+        const userData: RegisterRequest = {
+          role: role,
+          ...(role === "seeker"
+            ? {
+                fullName: formData.fullName,
+                email: formData.email || undefined,
+              }
+            : {
+                companyName: formData.companyName,
+                contactPerson: formData.contactPerson,
+                designation: formData.designation,
+                email: formData.email,
+              }),
+          phone: cleanPhone,
+          password: formData.password,
+        };
+
+        setRegistrationData(userData);
+
+        // Send OTP based on role
+        const contactInfo = role === "seeker" ? cleanPhone : formData.email;
+
+        await sendOtp(userData);
+
+        toast.dismiss(loadingToast);
+        toast.success(`Verification code sent to ${contactInfo}`, {
+          duration: 2000,
+        });
+        setShowOtpModal(true);
+      } catch (error) {
+        toast.dismiss(loadingToast);
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to send verification code";
+        toast.error(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -235,66 +328,73 @@ export default function RegisterPage() {
     }
 
     setIsLoading(true);
+    const verifyingToast = toast.loading("Verifying OTP...");
 
-    // Mock API call - Replace with actual API call later
+    // Clean phone number to +94 format
+    let cleanPhone = formData.phone;
+    if (cleanPhone.startsWith("0")) {
+      cleanPhone = "+94" + cleanPhone.substring(1);
+    }
+
+    const identifier = role === "seeker" ? cleanPhone : formData.email;
+    const otpData = otp.join("");
+
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const registrationData: RegisterRequest = {
+        role: role,
+        ...(role === "seeker"
+          ? {
+              fullName: formData.fullName,
+              email: formData.email || undefined,
+            }
+          : {
+              companyName: formData.companyName,
+              contactPerson: formData.contactPerson,
+              designation: formData.designation,
+              email: formData.email,
+            }),
+        phone: cleanPhone,
+        password: formData.password,
+      };
 
-      // Mock OTP verification (1234 is the mock OTP)
-      if (enteredOtp === "1234") {
-        // Mock registration API call
-        const registrationData = {
-          role,
-          ...(role === "seeker"
-            ? {
-                fullName: formData.fullName,
-                email: formData.email || null, // Optional email for seekers
-              }
-            : {
-                companyName: formData.companyName,
-                contactPerson: formData.contactPerson,
-                designation: formData.designation,
-                email: formData.email, // Required email for companies
-              }),
-          phone: formData.phone,
-          password: formData.password,
-        };
+      await verifyOtpAndRegisterUser(registrationData, identifier, otpData);
 
-        console.log("Registration data:", registrationData);
-        // Here you would make your actual API call:
-        // const response = await axios.post(&apos;/api/register&apos;, registrationData);
+      toast.dismiss(verifyingToast);
+      // Success message with redirect
+      const successToastId = toast.success(
+        role === "seeker"
+          ? "Registration successful! Redirecting to login..."
+          : "Company registration submitted for review! Redirecting to login...",
+      );
 
-        // Simulate successful registration
-        await new Promise((resolve) => setTimeout(resolve, 500));
+      setShowOtpModal(false);
+      setOtp(["", "", "", ""]);
 
-        setSuccessMessage("Registration successful! Redirecting to login...");
-        setShowOtpModal(false);
-        setOtp(["", "", "", ""]);
+      // Reset form
+      setFormData({
+        fullName: "",
+        companyName: "",
+        email: "",
+        phone: "",
+        designation: "",
+        contactPerson: "",
+        password: "",
+        confirmPassword: "",
+      });
 
-        // Reset form
-        setFormData({
-          fullName: "",
-          companyName: "",
-          email: "",
-          phone: "",
-          designation: "",
-          contactPerson: "",
-          password: "",
-          confirmPassword: "",
-        });
-
-        // Redirect to login after 2 seconds
-        setTimeout(() => {
-          window.location.href = "/auth/login";
-        }, 2000);
-      } else {
-        setErrors({ ...errors, otp: "Invalid OTP. Please try again." });
-        setOtp(["", "", "", ""]);
-      }
+      // Redirect after toast
+      setTimeout(() => {
+        toast.dismiss(successToastId);
+        router.push("/auth/login");
+      }, 2000);
     } catch (error) {
-      console.error("Registration error:", error);
-      setErrors({ ...errors, otp: "Registration failed. Please try again." });
+      toast.dismiss(verifyingToast);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Invalid OTP. Please try again.";
+      toast.error(errorMessage);
+      setErrors({ ...errors, otp: "Invalid OTP. Please try again." });
     } finally {
       setIsLoading(false);
     }
@@ -302,22 +402,56 @@ export default function RegisterPage() {
 
   const resendOtp = async () => {
     setIsLoading(true);
-    // Mock resend OTP
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("OTP resent to phone number:", formData.phone);
-    alert(`OTP has been resent to ${formData.phone}`);
-    setIsLoading(false);
+    const loadingToast = toast.loading("Sending verification code...");
+
+    try {
+      // Clean phone number to +94 format
+      let cleanPhone = formData.phone;
+      if (cleanPhone.startsWith("0")) {
+        cleanPhone = "+94" + cleanPhone.substring(1);
+      }
+
+      // Prepare registration data
+      const userData: RegisterRequest = {
+        role: role,
+        ...(role === "seeker"
+          ? {
+              fullName: formData.fullName,
+              // email: formData.email || undefined,
+            }
+          : {
+              companyName: formData.companyName,
+              contactPerson: formData.contactPerson,
+              designation: formData.designation,
+              email: formData.email,
+            }),
+        phone: cleanPhone,
+        password: formData.password,
+      };
+
+      setRegistrationData(userData);
+
+      // Send OTP based on role
+      const contactInfo = role === "seeker" ? cleanPhone : formData.email;
+
+      await sendOtp(userData);
+
+      toast.dismiss(loadingToast);
+      toast.success(`Verification code sent to ${contactInfo}`);
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to send verification code";
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="pt-10 pb-20 bg-primary/10 flex flex-col items-center justify-center p-4 min-h-screen">
-      {/* Success Message Toast */}
-      {successMessage && (
-        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-in slide-in-from-top-2">
-          {successMessage}
-        </div>
-      )}
-
       {/* Registration Card */}
       <div className="w-full max-w-md bg-background rounded-2xl shadow-2xl p-8">
         <div className="text-center mb-6">
@@ -335,7 +469,7 @@ export default function RegisterPage() {
             onClick={() => {
               setRole("seeker");
               setErrors({});
-              setFormData((prev) => ({ ...prev, email: "" })); // Clear email when switching to seeker
+              setFormData((prev) => ({ ...prev, email: "" }));
             }}
             className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-lg transition-all ${
               role === "seeker"
@@ -512,10 +646,38 @@ export default function RegisterPage() {
                 )}
               </div>
 
+              {/* Job Seeker: Email (Optional) */}
+              {/* <div className="space-y-1">
+                <label className="text-xs font-semibold text-primary/80">
+                  Email (Optional)
+                </label>
+                <div className="relative group">
+                  <Mail
+                    className="absolute left-3 top-3 text-primary/60"
+                    size={18}
+                  />
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    onBlur={handleBlur}
+                    className={`w-full pl-10 pr-4 py-2.5 bg-primary/20 border rounded-xl outline-none text-primary text-sm transition-colors ${
+                      touched.email && errors.email
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-primary/50 focus:border-primary"
+                    }`}
+                    placeholder="your@email.com (optional)"
+                  />
+                </div>
+                {touched.email && errors.email && (
+                  <p className="text-[10px] text-red-500">{errors.email}</p>
+                )}
+              </div> */}
             </>
           )}
 
-          {/* Mobile Number - Required for both, OTP sent here for job seekers */}
+          {/* Mobile Number */}
           <div className="space-y-1">
             <label className="text-xs font-semibold text-primary/80">
               {role === "company" ? "Contact Number *" : "Mobile Number *"}
@@ -537,22 +699,15 @@ export default function RegisterPage() {
                     ? "border-red-500 focus:border-red-500"
                     : "border-primary/50 focus:border-primary"
                 }`}
-                placeholder="+94 XX XXX XXXX"
+                placeholder="0712345678"
               />
             </div>
             {touched.phone && errors.phone && (
               <p className="text-[10px] text-red-500">{errors.phone}</p>
             )}
-            {role === "seeker" && (
-              <p className="text-[10px] text-primary/60">
-                OTP will be sent to this phone number via SMS/WhatsApp
-              </p>
-            )}
-            {role === "company" && (
-              <p className="text-[10px] text-primary/60">
-                Contact number for company communications
-              </p>
-            )}
+            <p className="text-[10px] text-primary/60">
+              Enter 0712345678 (will be converted to +94712345678)
+            </p>
           </div>
 
           {/* Password */}
@@ -672,9 +827,14 @@ export default function RegisterPage() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-primary/30 text-primary py-3 rounded-xl font-bold hover:bg-primary/50 cursor-pointer transform active:scale-[0.98] transition-all"
+            disabled={isLoading}
+            className="w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary/90 cursor-pointer transform active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {role === "seeker" ? "Register as Job Seeker" : "Register Company"}
+            {isLoading
+              ? "Sending verification..."
+              : role === "seeker"
+                ? "Register as Job Seeker"
+                : "Register Company"}
           </button>
         </form>
 
@@ -684,7 +844,7 @@ export default function RegisterPage() {
             Already have an account?{" "}
             <Link
               href="/auth/login"
-              className="text-primary/80 font-bold hover:underline"
+              className="text-primary font-bold hover:underline"
             >
               Login here
             </Link>
@@ -715,11 +875,6 @@ export default function RegisterPage() {
                 <span className="font-semibold text-primary">
                   {role === "seeker" ? formData.phone : formData.email}
                 </span>
-              </p>
-              <p className="text-xs text-gray-400 mt-1">
-                {role === "seeker"
-                  ? "OTP sent via SMS/WhatsApp"
-                  : "OTP sent via email"}
               </p>
             </div>
 
@@ -762,10 +917,6 @@ export default function RegisterPage() {
                 Resend OTP
               </button>
             </div>
-
-            <p className="text-center text-xs text-gray-400 mt-4">
-              Mock OTP: 1234
-            </p>
           </div>
         </div>
       )}

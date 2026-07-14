@@ -22,6 +22,8 @@ public class LoginResponse {
     @AllArgsConstructor
     public static class UserInfo {
         private String id;
+        private String name;
+        private String avatar;
         private String phone;
         private String email;
         private String role;

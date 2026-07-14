@@ -1,0 +1,49 @@
+server:
+  port: 8084
+
+spring:
+  config:
+    import: classpath:application-common.yml
+  application:
+    name: file-service
+  datasource:
+    url: jdbc:${FILE_DB_URL:postgresql://localhost:5432/file_db}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: false  # Temporarily disable validation
+    baseline-version: 0
+    locations: classpath:db/migration
+    table: flyway_schema_history
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:5MB}     # Increase from default 1MB
+      max-request-size: ${MAX_FILE_SIZE:5MB}   # Increase from default 1MB
+      enabled: true
+      file-size-threshold: 2KB
+
+storage:
+  bucket-name: ${STORAGE_BUCKET_NAME}
+  region: ${STORAGE_REGION}
+  endpoint: ${STORAGE_ENDPOINT}
+  access-key: ${STORAGE_ACCESS_KEY}
+  secret-key: ${STORAGE_SECRET_KEY}
+  presigned-url-expiry-minutes: 60
+  max-file-size: 5242880  # 5MB
+  allowed-image-types: image/jpeg,image/png,image/webp
+  allowed-document-types: application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document
+
+eureka:
+  client:
+    enabled: false  # Disable Eureka for local development
+    register-with-eureka: false
+    fetch-registry: false

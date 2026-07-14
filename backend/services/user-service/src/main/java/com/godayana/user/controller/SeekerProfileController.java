@@ -7,6 +7,7 @@ import com.godayana.user.service.SeekerProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -41,6 +42,22 @@ public class SeekerProfileController {
     public ApiResponse<Void> deleteMyProfile(@RequestHeader("X-User-Id") String userId) {
         seekerProfileService.deleteProfile(UUID.fromString(userId));
         return ApiResponse.success(null);
+    }
+
+    // Profile Picture Upload
+    @PostMapping("/me/profile-pic")
+    public ApiResponse<SeekerProfileResponse> uploadProfilePic(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestParam("file") MultipartFile file) {
+        return ApiResponse.success(seekerProfileService.uploadProfilePic(UUID.fromString(userId), file));
+    }
+
+    // Resume Upload
+    @PostMapping("/me/resume")
+    public ApiResponse<SeekerProfileResponse> uploadResume(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestParam("file") MultipartFile file) {
+        return ApiResponse.success(seekerProfileService.uploadResume(UUID.fromString(userId), file));
     }
 
     // Internal endpoints for auth service

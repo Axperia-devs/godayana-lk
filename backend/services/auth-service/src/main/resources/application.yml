@@ -22,7 +22,7 @@ spring:
     enabled: true
     baseline-on-migrate: true
     validate-on-migrate: false  # Temporarily disable validation
-    baseline-version: 1
+    baseline-version: 0
     locations: classpath:db/migration
     table: flyway_schema_history
     
@@ -42,6 +42,10 @@ notification:
 user:
   service:
     url: ${USER_SERVICE_URL:http://localhost:8082}
+
+file:
+  service:
+    url: ${FILE_SERVICE_URL:http://localhost:8084}
 
 logging:
   level:

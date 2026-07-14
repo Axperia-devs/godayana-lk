@@ -1,7 +1,7 @@
 // src/components/company/profile/CompanyAgreementsTab.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -15,14 +15,33 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { companyAPI, CompanyProfileData } from "@/lib/api/endpoints/companyEndpoints";
 import toast from "react-hot-toast";
 
-export function CompanyAgreementsTab() {
+interface CompanyAgreementsTabProps {
+  companyData: CompanyProfileData | null;
+  onSaveComplete?: (message?: string) => void;
+}
+
+export function CompanyAgreementsTab({
+  companyData,
+  onSaveComplete,
+}: CompanyAgreementsTabProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [agreements, setAgreements] = useState({
     jobPostingTerms: false,
     cvDeliveryTerms: false,
   });
+
+  // Populate agreements when companyData changes
+  useEffect(() => {
+    if (companyData) {
+      setAgreements({
+        jobPostingTerms: companyData.jobPostingTerms || false,
+        cvDeliveryTerms: companyData.cvDeliveryTerms || false,
+      });
+    }
+  }, [companyData]);
 
   const handleAgreementToggle = (key: keyof typeof agreements) => {
     setAgreements({ ...agreements, [key]: !agreements[key] });
@@ -30,23 +49,42 @@ export function CompanyAgreementsTab() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!agreements.jobPostingTerms || !agreements.cvDeliveryTerms) {
-      toast.error("Please accept all terms and agreements");
-      return;
-    }
+    // if (!agreements.jobPostingTerms || !agreements.cvDeliveryTerms) {
+    //   toast.error("Please accept all terms and agreements");
+    //   return;
+    // }
+
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast.success("Agreements updated successfully");
-    setIsLoading(false);
+    const loadingToast = toast.loading("Updating agreements...");
+
+    try {
+      const updateData = {
+        ...companyData,
+        jobPostingTerms: agreements.jobPostingTerms,
+        cvDeliveryTerms: agreements.cvDeliveryTerms,
+      };
+
+      await companyAPI.updateCompanyProfile(updateData);
+
+      toast.dismiss(loadingToast);
+      if (onSaveComplete) {
+        await onSaveComplete("Agreements updated successfully");
+      } else {
+        toast.success("Agreements updated successfully");
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error("Failed to update agreements");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Terms & Agreements */}
       <div className="space-y-6">
-        <Label className="text-lg font-semibold mb-6">
-          Terms & Agreements
-        </Label>
+        <Label className="text-lg font-semibold mb-6">Terms & Agreements</Label>
 
         {/* Job Posting Terms */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-4">
@@ -169,22 +207,57 @@ export function CompanyAgreementsTab() {
       {/* Account Status */}
       <div className="space-y-4 pt-4 border-t">
         <h3 className="text-lg font-semibold">Account Status</h3>
-        <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
+        <div
+          className={`rounded-lg p-4 border ${
+            companyData?.isVerified
+              ? "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800"
+              : "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800"
+          }`}
+        >
           <div className="flex items-center gap-3">
-            <CheckCircle
-              className="text-green-600 dark:text-green-400"
-              size={20}
-            />
+            {companyData?.isVerified ? (
+              <CheckCircle
+                className="text-green-600 dark:text-green-400"
+                size={20}
+              />
+            ) : (
+              <FileText
+                className="text-yellow-600 dark:text-yellow-400"
+                size={20}
+              />
+            )}
             <div>
-              <p className="font-semibold text-green-800 dark:text-green-300">
-                Your account is Approved
+              <p
+                className={`font-semibold ${
+                  companyData?.isVerified
+                    ? "text-green-800 dark:text-green-300"
+                    : "text-yellow-800 dark:text-yellow-300"
+                }`}
+              >
+                {companyData?.isVerified
+                  ? "Your account is Verified"
+                  : "Your account is Pending Verification"}
               </p>
-              <p className="text-sm text-green-700 dark:text-green-400">
-                You can now post jobs and access all features.
+              <p
+                className={`text-sm ${
+                  companyData?.isVerified
+                    ? "text-green-700 dark:text-green-400"
+                    : "text-yellow-700 dark:text-yellow-400"
+                }`}
+              >
+                {companyData?.isVerified
+                  ? "You can now post jobs and access all features."
+                  : "Please wait for account verification to access all features."}
               </p>
             </div>
-            <Badge className="ml-auto bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-              Active
+            <Badge
+              className={`ml-auto ${
+                companyData?.isVerified
+                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                  : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+              }`}
+            >
+              {companyData?.isVerified ? "Active" : "Pending"}
             </Badge>
           </div>
         </div>

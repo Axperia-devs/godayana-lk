@@ -302,7 +302,7 @@ export default function CompanyCourses() {
               </button>
             </div>
             <div>
-              <Link href="/company/courses/post">
+              <Link href="/company/courses/create">
                 <Button className="gap-2 cursor-pointer w-full lg:w-auto">
                   <Plus size={16} />
                   Post a Course

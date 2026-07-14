@@ -3,11 +3,21 @@ import axios, {
   AxiosInstance,
   InternalAxiosRequestConfig,
   AxiosError,
+  AxiosResponse,
 } from "axios";
 
-interface Tokens {
-  accessToken: string | null;
-  refreshToken: string | null;
+interface ApiErrorResponse {
+  success: false;
+  message: string;
+  errorCode?: string;
+  timestamp: number;
+}
+
+interface ApiSuccessResponse<T> {
+  success: true;
+  data: T;
+  message?: string;
+  timestamp: number;
 }
 
 class AxiosClient {
@@ -22,7 +32,7 @@ class AxiosClient {
 
   constructor() {
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api",
+      baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1",
       headers: {
         "Content-Type": "application/json",
       },
@@ -39,19 +49,33 @@ class AxiosClient {
         if (this.accessToken) {
           config.headers.Authorization = `Bearer ${this.accessToken}`;
         }
+
         return config;
       },
-      (error) => Promise.reject(error),
+      (error: AxiosError) => Promise.reject(error),
     );
 
-    // Response interceptor - handle token refresh
+    // Response interceptor - handle token refresh and common error handling
     this.client.interceptors.response.use(
-      (response) => response,
+      (response: AxiosResponse) => {
+        // Check if response has success: false and throw error
+        if (response.data && response.data.success === false) {
+          const errorData = response.data as ApiErrorResponse;
+          const error = new Error(
+            errorData.message || "An error occurred",
+          ) as AxiosError;
+          error.response = response;
+          error.status = response.status;
+          throw error;
+        }
+        return response;
+      },
       async (error: AxiosError) => {
         const originalRequest = error.config as InternalAxiosRequestConfig & {
           _retry?: boolean;
         };
 
+        // Handle 401 Unauthorized - Token refresh
         if (error.response?.status === 401 && !originalRequest._retry) {
           if (this.isRefreshing) {
             // Queue the request while refreshing
@@ -59,7 +83,7 @@ class AxiosClient {
               this.failedQueue.push({ resolve, reject });
             })
               .then(() => this.client(originalRequest))
-              .catch((err) => Promise.reject(err));
+              .catch((err: unknown) => Promise.reject(err));
           }
 
           originalRequest._retry = true;
@@ -74,16 +98,35 @@ class AxiosClient {
             } else {
               this.processQueue(new Error("Token refresh failed"), null);
               this.clearTokens();
-              window.dispatchEvent(new Event("authLogout"));
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new Event("authLogout"));
+              }
               return Promise.reject(error);
             }
           } catch (refreshError) {
             this.processQueue(refreshError as Error, null);
             this.clearTokens();
-            window.dispatchEvent(new Event("authLogout"));
+            if (typeof window !== "undefined") {
+              window.dispatchEvent(new Event("authLogout"));
+            }
             return Promise.reject(refreshError);
           } finally {
             this.isRefreshing = false;
+          }
+        }
+
+        // Check if error response has success: false and extract message
+        if (error.response?.data) {
+          const errorData = error.response.data as ApiErrorResponse;
+          if (errorData.success === false && errorData.message) {
+            // Create a new error with the API message
+            const customError = new Error(errorData.message);
+            Object.assign(customError, {
+              response: error.response,
+              status: error.response.status,
+              errorCode: errorData.errorCode,
+            });
+            return Promise.reject(customError);
           }
         }
 
@@ -115,7 +158,7 @@ class AxiosClient {
       const { accessToken, refreshToken: newRefreshToken } = response.data;
       this.setTokens(accessToken, newRefreshToken || this.refreshToken);
       return accessToken;
-    } catch (error) {
+    } catch {
       return null;
     }
   }

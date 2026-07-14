@@ -96,6 +96,16 @@ public class FallbackHandler {
                 .status(HttpStatus.SERVICE_UNAVAILABLE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(ApiResponse.error(
+                        "File service is temporarily unavailable. Please try again later.",
+                        "SERVICE_UNAVAILABLE"
+                ));
+    }
+
+    public Mono<ServerResponse> handleFileFallback(ServerRequest request) {
+        return ServerResponse
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ApiResponse.error(
                         "Admin service is temporarily unavailable. Please try again later.",
                         "SERVICE_UNAVAILABLE"
                 ));
