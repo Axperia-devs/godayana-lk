@@ -3,11 +3,11 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { JobDetailsView } from "@/components/jobs/JobDetailsView";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { JobDetailsView } from "@/components/jobs/JobDetailsView copy";
 
 // Define the JobDetails interface
 interface JobDetails {
