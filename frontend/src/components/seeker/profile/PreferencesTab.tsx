@@ -1,12 +1,12 @@
 // src/components/seeker/profile/PreferencesTab.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus } from "lucide-react";
+import { X } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +18,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { seekerAPI, SeekerProfileData } from "@/lib/api/endpoints/seekerEndpoints";
 import toast from "react-hot-toast";
+
+interface PreferencesTabProps {
+  userData: SeekerProfileData | null;
+  onSaveComplete?: (message?: string) => void;
+}
 
 const jobCategories = [
   "IT & Software",
@@ -33,11 +39,32 @@ const jobCategories = [
   "Hospitality",
 ];
 
-export function PreferencesTab() {
+export function PreferencesTab({
+  userData,
+  onSaveComplete,
+}: PreferencesTabProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [showShareCV, setShowShareCV] = useState(true);
+  const [showShareCV, setShowShareCV] = useState(false);
   const [allowContact, setAllowContact] = useState(true);
+
+  // Populate form data when userData changes
+  useEffect(() => {
+    if (userData) {
+      // Set preferred job categories
+      if (
+        userData.preferredJobCategories &&
+        Array.isArray(userData.preferredJobCategories)
+      ) {
+        setSelectedCategories(userData.preferredJobCategories);
+      }
+
+      // Set share CV preference
+      if (userData.shareCv !== undefined) {
+        setShowShareCV(userData.shareCv);
+      }
+    }
+  }, [userData]);
 
   const handleAddCategory = (category: string) => {
     if (
@@ -55,17 +82,49 @@ export function PreferencesTab() {
   };
 
   const handleDeleteAccount = async () => {
+    const loadingToast = toast.loading("Deleting account...");
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    toast.error("Account deletion requested");
-    setIsLoading(false);
+    try {
+      // API call to delete account
+      // await authAPI.deleteAccount();
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      toast.dismiss(loadingToast);
+      toast.success("Account deletion requested");
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error("Failed to delete account");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSavePreferences = async () => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast.success("Preferences saved successfully");
-    setIsLoading(false);
+    const loadingToast = toast.loading("Saving preferences...");
+
+    try {
+      const updateData = {
+        ...userData,
+        preferredJobCategories: selectedCategories,
+        shareCv: showShareCV,
+      };
+
+      // API call to save preferences
+      await seekerAPI.updateSeekerProfile(updateData);
+
+      toast.dismiss(loadingToast);
+
+      if (onSaveComplete) {
+        await onSaveComplete("Preferences saved successfully");
+      } else {
+        toast.success("Preferences saved successfully");
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error("Failed to save preferences");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -96,6 +155,11 @@ export function PreferencesTab() {
                 </button>
               </Badge>
             ))}
+            {selectedCategories.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No categories selected. Add up to 3 categories.
+              </p>
+            )}
           </div>
 
           {/* Add Category Dropdown */}
@@ -109,8 +173,13 @@ export function PreferencesTab() {
                 }
               }}
               value=""
+              disabled={selectedCategories.length >= 3}
             >
-              <option value="">Add Category</option>
+              <option value="">
+                {selectedCategories.length >= 3
+                  ? "Maximum categories reached"
+                  : "Add Category"}
+              </option>
               {jobCategories
                 .filter((cat) => !selectedCategories.includes(cat))
                 .map((category) => (
@@ -119,6 +188,11 @@ export function PreferencesTab() {
                   </option>
                 ))}
             </select>
+            {selectedCategories.length >= 3 && (
+              <p className="text-xs text-amber-500 mt-1">
+                You&apos;ve reached the maximum of 3 categories
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -134,19 +208,28 @@ export function PreferencesTab() {
               Allow employers to view your CV and contact you
             </p>
           </div>
-          <Switch checked={showShareCV} onCheckedChange={setShowShareCV} className="cursor-pointer" />
+          <Switch
+            checked={showShareCV}
+            onCheckedChange={setShowShareCV}
+            className="cursor-pointer"
+          />
         </div>
 
+        {/* Uncomment if you want to add this feature */}
         {/* <div className="flex items-center justify-between">
           <div>
-            <Label className="text-base font-semibold">
+            <Label className="text-base font-semibold text-primary">
               Allow employers to contact you directly
             </Label>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground pr-2">
               Employers can reach you via email or phone
             </p>
           </div>
-          <Switch checked={allowContact} onCheckedChange={setAllowContact} />
+          <Switch 
+            checked={allowContact} 
+            onCheckedChange={setAllowContact} 
+            className="cursor-pointer"
+          />
         </div> */}
       </div>
 

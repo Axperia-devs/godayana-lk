@@ -80,6 +80,12 @@ public class CompanyProfile {
     @Column(name = "is_verified")
     private Boolean isVerified = false;
 
+    @Column(name = "cv_delivery_terms")
+    private Boolean cvDeliveryTerms;
+
+    @Column(name = "job_posting_terms")
+    private Boolean jobPostingTerms;
+
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private CompanyStatus status = CompanyStatus.PENDING;

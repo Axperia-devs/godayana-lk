@@ -1,6 +1,7 @@
 package com.godayana.user.controller;
 
 import com.godayana.dto.ApiResponse;
+import com.godayana.dto.company.CompanyDetailsResponse;
 import com.godayana.user.dto.CompanyProfileRequest;
 import com.godayana.user.dto.CompanyProfileResponse;
 import com.godayana.user.service.CompanyProfileService;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +38,14 @@ public class CompanyProfileController {
     public ApiResponse<Void> deleteMyProfile(@RequestHeader("X-User-Id") String userId) {
         companyProfileService.deleteProfile(UUID.fromString(userId));
         return ApiResponse.success(null);
+    }
+
+    // Profile Picture Upload
+    @PostMapping("/me/logo")
+    public ApiResponse<CompanyProfileResponse> uploadProfileLog(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestParam("file") MultipartFile file) {
+        return ApiResponse.success(companyProfileService.uploadProfileLogo(UUID.fromString(userId), file));
     }
 
     // Admin endpoints
@@ -67,5 +77,10 @@ public class CompanyProfileController {
             @RequestParam UUID userId,
             @Valid @RequestBody CompanyProfileRequest request) {
         return ApiResponse.success(companyProfileService.createProfile(userId, request));
+    }
+
+    @GetMapping("/internal/{companyId}")
+    public ApiResponse<CompanyDetailsResponse> getCompanyProfile(@PathVariable UUID companyId) {
+        return ApiResponse.success(companyProfileService.getInternalProfileByUserId(companyId));
     }
 }

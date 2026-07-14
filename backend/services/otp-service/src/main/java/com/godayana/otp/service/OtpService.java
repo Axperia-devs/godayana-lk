@@ -26,7 +26,7 @@ public class OtpService {
     private final OtpRepository otpRepository;
     private final JavaMailSender mailSender;
 
-    @Value("${otp.length:6}")
+    @Value("${otp.length:4}")
     private int otpLength;
 
     @Value("${otp.expiration-minutes:5}")

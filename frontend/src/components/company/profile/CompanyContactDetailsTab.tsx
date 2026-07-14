@@ -1,7 +1,7 @@
 // src/components/company/profile/CompanyContactDetailsTab.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,9 +15,18 @@ import {
   User,
   Briefcase,
 } from "lucide-react";
+import { companyAPI, CompanyProfileData } from "@/lib/api/endpoints/companyEndpoints";
 import toast from "react-hot-toast";
 
-export function CompanyContactDetailsTab() {
+interface CompanyContactDetailsTabProps {
+  companyData: CompanyProfileData | null;
+  onSaveComplete?: (message?: string) => void;
+}
+
+export function CompanyContactDetailsTab({
+  companyData,
+  onSaveComplete,
+}: CompanyContactDetailsTabProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     companyEmail: "",
@@ -31,12 +40,57 @@ export function CompanyContactDetailsTab() {
     cvDeliveryEmail: "",
   });
 
+  // Populate form data when companyData changes
+  useEffect(() => {
+    if (companyData) {
+      setFormData({
+        companyEmail: companyData.companyEmail || "",
+        hotlineNumber: companyData.hotlineNumber || "",
+        website: companyData.website || "",
+        facebookUrl: companyData.facebookUrl || "",
+        linkedinUrl: companyData.linkedinUrl || "",
+        instagramUrl: companyData.instagramUrl || "",
+        contactPersonName: companyData.contactPersonName || "",
+        designation: companyData.designation || "",
+        cvDeliveryEmail: companyData.cvDeliveryEmail || "",
+      });
+    }
+  }, [companyData]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast.success("Contact information updated successfully");
-    setIsLoading(false);
+    const loadingToast = toast.loading("Updating contact details...");
+
+    try {
+      // Prepare update data
+      const updateData = {
+        ...companyData,
+        companyEmail: formData.companyEmail,
+        hotlineNumber: formData.hotlineNumber,
+        website: formData.website,
+        facebookUrl: formData.facebookUrl,
+        linkedinUrl: formData.linkedinUrl,
+        instagramUrl: formData.instagramUrl,
+        contactPersonName: formData.contactPersonName,
+        designation: formData.designation,
+        cvDeliveryEmail: formData.cvDeliveryEmail,
+      };
+
+      await companyAPI.updateCompanyProfile(updateData);
+
+      toast.dismiss(loadingToast);
+      if (onSaveComplete) {
+        await onSaveComplete("Contact details updated successfully");
+      } else {
+        toast.success("Contact details updated successfully");
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error("Failed to update contact details");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -53,7 +107,8 @@ export function CompanyContactDetailsTab() {
               htmlFor="companyEmail"
               className="text-sm font-semibold text-primary"
             >
-              Company Email <span className="text-red-500">*</span>
+              Company Email 
+              {/* <span className="text-red-500">*</span> */}
             </Label>
             <div className="relative mt-1.5">
               <Mail
@@ -68,7 +123,7 @@ export function CompanyContactDetailsTab() {
                   setFormData({ ...formData, companyEmail: e.target.value })
                 }
                 placeholder="hr@techcorp.com"
-                required
+                disabled
                 className="pl-10"
               />
             </div>

@@ -3,11 +3,12 @@ package com.godayana.auth.service;
 import com.godayana.auth.dto.LoginRequest;
 import com.godayana.auth.dto.LoginResponse;
 import com.godayana.auth.dto.RegisterRequest;
+import com.godayana.auth.dto.UserResponse;
 import com.godayana.auth.entity.User;
 import com.godayana.auth.repository.UserRepository;
+import com.godayana.auth.service.interfaces.IAuthService;
 import com.godayana.dto.ApiResponse;
 import com.godayana.exception.BusinessException;
-import com.godayana.exception.DuplicateResourceException;
 import com.godayana.exception.ErrorCode;
 import com.godayana.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AuthService {
+public class AuthService implements IAuthService {
 
     private final UserRepository userRepository;
     private final RefreshTokenService refreshTokenService;
@@ -44,6 +45,10 @@ public class AuthService {
     @Value("${user.service.url}")
     private String userServiceUrl;
 
+    @Value("${file.service.url}")
+    private String fileServiceUrl;
+
+    @Override
     @Transactional
     public Map<String, String> initiateRegistration(RegisterRequest request) {
         // Check if user already exists
@@ -99,6 +104,7 @@ public class AuthService {
                       "tempId", UUID.randomUUID().toString());
     }
 
+    @Override
     @Transactional
     public Map<String, String> verifyOtpAndRegister(String identifier, String otpCode, RegisterRequest request) {
         // Verify OTP
@@ -154,6 +160,7 @@ public class AuthService {
 
         User user = User.builder()
                 .phone(request.getPhone())
+                .name(role == User.Role.SEEKER ? request.getFullName() : request.getCompanyName())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(role)
@@ -220,6 +227,7 @@ public class AuthService {
         return Map.of("message", "Registration successful");
     }
 
+    @Override
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByPhone(request.getUsername())
                 .or(() -> userRepository.findByEmail(request.getUsername()))
@@ -258,12 +266,16 @@ public class AuthService {
 
         String refreshToken = refreshTokenService.createRefreshToken(user);
 
+        String avatar = getPresignedUrlFromFileService(user.getId().toString());
+
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .expiresIn(86400000L)
                 .user(LoginResponse.UserInfo.builder()
                         .id(user.getId().toString())
+                        .avatar(avatar)
+                        .name(user.getName())
                         .phone(user.getPhone())
                         .email(user.getEmail())
                         .role(user.getRole().toString())
@@ -271,6 +283,61 @@ public class AuthService {
                 .build();
     }
 
+    @Override
+    public UserResponse getUserById(String userId) {
+        User user = userRepository.findById(UUID.fromString(userId))
+                //.orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new BusinessException(
+                        "User not found",
+                        ErrorCode.RESOURCE_NOT_FOUND.getCode(),
+                        HttpStatus.SC_NOT_FOUND
+                ));
+
+        String avatar = getPresignedUrlFromFileService(user.getId().toString());
+
+        return UserResponse.builder()
+                    .id(user.getId().toString())
+                    .name(user.getName())
+                    .avatar(avatar)
+                    .phone(user.getPhone())
+                    .email(user.getEmail())
+                    .role(user.getRole().toString())
+                    .build();
+    }
+
+    private String getPresignedUrlFromFileService(String userId) {
+        try {
+//            Map<String, String> requestBody = Map.of("fileKey", fileKey);
+
+//            ApiResponse<String> response = webClientBuilder.build()
+//                    .post()
+//                    .uri(fileServiceUrl + "/api/v1/files/internal/presigned-url")
+//                    .contentType(MediaType.APPLICATION_JSON)
+//                    .bodyValue(requestBody)
+//                    .retrieve()
+//                    .bodyToMono(new ParameterizedTypeReference<ApiResponse<String>>() {})
+//                    .block();
+
+            ApiResponse<String> response = webClientBuilder.build()
+                    .get()
+                    .uri(fileServiceUrl + "/api/v1/files/internal/presigned-url/profile-pics/" + userId)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<ApiResponse<String>>() {})
+                    .block();
+
+            if (response != null && response.isSuccess() && response.getData() != null) {
+                return response.getData();
+            }
+
+            log.error("Failed to get presigned URL: {}", response != null ? response.getMessage() : "Unknown error");
+            return null;
+        } catch (Exception e) {
+            log.error("Failed to get presigned URL", e);
+            return null;
+        }
+    }
+
+    @Override
     public LoginResponse refreshToken(String refreshToken) {
         String userId = refreshTokenService.validateAndGetUserId(refreshToken);
         User user = userRepository.findById(UUID.fromString(userId))
@@ -300,6 +367,7 @@ public class AuthService {
                 .build();
     }
 
+    @Override
     @Transactional
     public void logout(String userId, String refreshToken) {
         User user = userRepository.findById(UUID.fromString(userId))
@@ -312,13 +380,18 @@ public class AuthService {
         refreshTokenService.revokeRefreshToken(user);
     }
 
-    public User getUserById(String userId) {
-        return userRepository.findById(UUID.fromString(userId))
-                //.orElseThrow(() -> new RuntimeException("User not found"));
+    @Override
+    public void updateName(String userId, String name) {
+        User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new BusinessException(
                         "User not found",
                         ErrorCode.RESOURCE_NOT_FOUND.getCode(),
                         HttpStatus.SC_NOT_FOUND
                 ));
+
+        user.setName(name);
+
+        userRepository.save(user);
     }
+
 }

@@ -4,6 +4,7 @@ import "./globals.css"
 import { Toaster } from "react-hot-toast";
 import { ReduxProvider } from "@/lib/redux/Provider";
 import { ThemeProvider } from "next-themes";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -92,8 +93,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ReduxProvider>
-            {children}
-            <Toaster />
+            <AuthProvider>
+              {children}
+              <Toaster />
+            </AuthProvider>
           </ReduxProvider>
         </ThemeProvider>
       </body>

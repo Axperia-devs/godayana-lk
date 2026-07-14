@@ -1,0 +1,9 @@
+ALTER TABLE users
+ADD COLUMN name VARCHAR(255);
+
+UPDATE users SET name = 'Developer' WHERE id = '11111111-1111-1111-1111-111111111111'::uuid;
+UPDATE users SET name = 'Admin' WHERE id = '22222222-2222-2222-2222-222222222222'::uuid;
+UPDATE users SET name = 'Seeker' WHERE id = '33333333-3333-3333-3333-333333333333'::uuid;
+UPDATE users SET name = 'Company' WHERE id = '44444444-4444-4444-4444-444444444444'::uuid;
+
+UPDATE users SET name = 'default_value' WHERE name IS NULL;

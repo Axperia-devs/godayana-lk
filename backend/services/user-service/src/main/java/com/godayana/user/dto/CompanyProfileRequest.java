@@ -33,13 +33,18 @@ public class CompanyProfileRequest {
     private String linkedinUrl;
     private String instagramUrl;
 
-    @NotBlank(message = "Contact person name is required")
+//    @NotBlank(message = "Contact person name is required")
     private String contactPersonName;
 
-    @NotBlank(message = "Designation is required")
+//    @NotBlank(message = "Designation is required")
     private String designation;
 
     @Email(message = "Invalid email format")
-    @NotBlank(message = "CV delivery email is required")
+//    @NotBlank(message = "CV delivery email is required")
     private String cvDeliveryEmail;
+
+    private Boolean jobPostingTerms;
+
+    private Boolean cvDeliveryTerms;
+
 }

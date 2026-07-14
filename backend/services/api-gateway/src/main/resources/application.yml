@@ -8,11 +8,14 @@ spring:
     web-application-type: reactive
   cloud:
     gateway:
-      routes:
-        - id: auth-service
-          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
-          predicates:
-            - Path=/api/v1/auth/**
+      httpclient:
+        connect-timeout: 10000
+        response-timeout: 60000
+#      routes:
+#        - id: auth-service
+#          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+#          predicates:
+#            - Path=/api/v1/auth/**
 #          filters:
 #            # Remove circuit breaker temporarily to test
 #            - name: StripPrefix
@@ -33,16 +36,26 @@ spring:
 #                  maxBackoff: 500ms
 #                  factor: 2
 #                  basedOnPreviousValue: true
-
-        - id: otp-service
-          uri: ${OTP_SERVICE_URL:http://localhost:8090}
-          predicates:
-            - Path=/api/v1/otp/**
-
-        - id: user-service
-          uri: ${USER_SERVICE_URL:http://localhost:8082}
-          predicates:
-            - Path=/api/v1/users/**, /api/v1/profiles/**, /api/v1/seeker/**, /api/v1/company/**
+#
+#        - id: otp-service
+#          uri: ${OTP_SERVICE_URL:http://localhost:8090}
+#          predicates:
+#            - Path=/api/v1/otp/**
+#
+#        - id: user-service
+#          uri: ${USER_SERVICE_URL:http://localhost:8082}
+#          predicates:
+#            - Path=/api/v1/users/**, /api/v1/profiles/**, /api/v1/seeker/**, /api/v1/company/**
+#
+#        - id: file-service
+#          uri: ${FILE_SERVICE_URL:http://localhost:8084}
+#          predicates:
+#            - Path=/api/v1/file/**
+#
+#        - id: job-service
+#          uri: ${JOB_SERVICE_URL:http://localhost:8083}
+#          predicates:
+#            - Path=/api/v1/jobs/**, /api/v1/applications/**
 
     autoconfigure:
       exclude:
@@ -106,24 +119,62 @@ management:
       enabled: true
 
 # Resilience4j Configuration
+#resilience4j:
+#  circuitbreaker:
+#    instances:
+#      authService:
+#        slidingWindowSize: 10
+#        failureRateThreshold: 50
+#        waitDurationInOpenState: 10s
+#        permittedNumberOfCallsInHalfOpenState: 3
+#      userService:
+#        slidingWindowSize: 10
+#        failureRateThreshold: 50
+#        waitDurationInOpenState: 10s
+#        permittedNumberOfCallsInHalfOpenState: 3
+#  retry:
+#    instances:
+#      authService:
+#        maxAttempts: 3
+#        waitDuration: 1s
+#      userService:
+#        maxAttempts: 3
+#        waitDuration: 1s
+
 resilience4j:
   circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-type: TIME_BASED
+        record-exceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
     instances:
       authService:
-        slidingWindowSize: 10
-        failureRateThreshold: 50
-        waitDurationInOpenState: 10s
-        permittedNumberOfCallsInHalfOpenState: 3
-      userService:
-        slidingWindowSize: 10
-        failureRateThreshold: 50
-        waitDurationInOpenState: 10s
-        permittedNumberOfCallsInHalfOpenState: 3
+        base-config: default
+  timelimiter:
+    instances:
+      authService:
+        timeout-duration: 10s
   retry:
     instances:
       authService:
-        maxAttempts: 3
-        waitDuration: 1s
-      userService:
-        maxAttempts: 3
-        waitDuration: 1s
+        max-attempts: 3
+        wait-duration: 1s
+        retry-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+        exponential-backoff-multiplier: 2
+
+#logging:
+#  level:
+#    org.springframework.cloud.gateway: TRACE
+#    org.springframework.cloud.gateway.filter.factory.RetryGatewayFilterFactory: DEBUG
+#    reactor.netty.http.client: DEBUG
+#    org.springframework.web.reactive.function.client: DEBUG

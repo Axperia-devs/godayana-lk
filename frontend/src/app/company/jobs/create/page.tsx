@@ -1,4 +1,4 @@
-// src/app/company/jobs/post/page.tsx
+// src/app/company/jobs/create/page.tsx
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";

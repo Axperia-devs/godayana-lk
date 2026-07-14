@@ -1,7 +1,7 @@
 // src/components/seeker/profile/CareerDetailsTab.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,13 +14,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Upload, FileText, ExternalLink } from "lucide-react";
+import { seekerAPI, SeekerProfileData } from "@/lib/api/endpoints/seekerEndpoints";
 import toast from "react-hot-toast";
 
-export function CareerDetailsTab() {
+interface CareerDetailsTabProps {
+  userData: SeekerProfileData | null;
+  onSaveComplete?: (message?: string) => void;
+}
+
+export function CareerDetailsTab({
+  userData,
+  onSaveComplete,
+}: CareerDetailsTabProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [skills, setSkills] = useState<string[]>([]);
   const [currentSkill, setCurrentSkill] = useState("");
+  const [selectKey, setSelectKey] = useState(0);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [resumeUrl, setResumeUrl] = useState("");
   const [formData, setFormData] = useState({
     employmentStatus: "",
     currentJobTitle: "",
@@ -30,10 +43,39 @@ export function CareerDetailsTab() {
     currentSalary: "",
     expectedSalary: "",
     noticePeriod: "",
-    resume: "",
+    // resume: "",
     portfolio: "",
     summary: "",
   });
+
+  // Populate form data when userData changes
+  useEffect(() => {
+    if (userData) {
+      setFormData({
+        employmentStatus: userData.employmentStatus || "",
+        currentJobTitle: userData.currentJobTitle || "",
+        experience: userData.experienceYears?.toString() || "",
+        education: userData.education || "",
+        studyField: userData.studyField || "",
+        currentSalary: userData.currentSalary?.toString() || "",
+        expectedSalary: userData.expectedSalary?.toString() || "",
+        noticePeriod: userData.noticePeriod?.toString() || "",
+        // resume: userData.resumeUrl || "",
+        portfolio: userData.portfolioUrl || "",
+        summary: userData.professionalSummary || "",
+      });
+
+      setResumeUrl(userData.resumeUrl!)
+
+      // Set skills if available
+      if (userData.skills && Array.isArray(userData.skills)) {
+        setSkills(userData.skills);
+      }
+
+      // Force Select components to re-render with new values
+      setSelectKey((prev) => prev + 1);
+    }
+  }, [userData]);
 
   const handleAddSkill = () => {
     if (currentSkill && !skills.includes(currentSkill)) {
@@ -46,12 +88,108 @@ export function CareerDetailsTab() {
     setSkills(skills.filter((s) => s !== skill));
   };
 
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size should be less than 5MB");
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Please upload PDF, DOC, or DOCX files only");
+      return;
+    }
+
+    setResumeFile(file);
+    setIsUploading(true);
+    const loadingToast = toast.loading("Uploading resume...");
+
+    try {
+      // Upload the resume using your API
+      const response = await seekerAPI.uploadResume(file);
+      const apiResponse = response.data;
+      
+      if (apiResponse.success && apiResponse.data) {
+        setResumeUrl(apiResponse.data.resumeUrl!);
+      }
+
+      toast.dismiss(loadingToast);
+      toast.success("Resume uploaded successfully");
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error("Failed to upload resume");
+      setResumeFile(null);
+    } finally {
+      setIsUploading(false);
+      // Reset the input
+      e.target.value = "";
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast.success("Career details updated successfully");
-    setIsLoading(false);
+    const loadingToast = toast.loading("Updating career details...");
+
+    try {
+      // Prepare data for API
+      const updateData = {
+        ...userData,
+        employmentStatus: formData.employmentStatus,
+        currentJobTitle: formData.currentJobTitle,
+        education: formData.education,
+        studyField: formData.studyField,
+        experienceYears: parseInt(formData.experience) || 0,
+        expectedSalary: parseInt(formData.expectedSalary) || 0,
+        noticePeriod: parseInt(formData.noticePeriod) || 0,
+        portfolioUrl: formData.portfolio,
+        professionalSummary: formData.summary,
+        // resumeUrl: formData.resume,
+        skills: skills,
+      };
+
+      await seekerAPI.updateSeekerProfile(updateData);
+      toast.dismiss(loadingToast);
+
+      if (onSaveComplete) {
+        await onSaveComplete("Career details updated successfully");
+      } else {
+        toast.success("Career details updated successfully");
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error("Failed to update career details");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Helper function to get user's full name
+  const getUserFullName = () => {
+    if (!userData) return "User";
+    const fullName = userData.fullName || "";
+    return `${fullName}`.trim() || "User";
+  };
+
+  // Helper function to get file icon based on extension
+  const getFileIcon = (url: string) => {
+    if (!url) return <FileText className="h-4 w-4" />;
+    const extension = url.split(".").pop()?.toLowerCase();
+    if (extension === "pdf")
+      return <FileText className="h-4 w-4 text-red-500" />;
+    if (["doc", "docx"].includes(extension || "")) {
+      return <FileText className="h-4 w-4 text-blue-500" />;
+    }
+    return <FileText className="h-4 w-4" />;
   };
 
   return (
@@ -69,7 +207,8 @@ export function CareerDetailsTab() {
               Employment Status <span className="text-red-500">*</span>
             </Label>
             <Select
-              value={formData.employmentStatus}
+              key={`employment-status-${selectKey}`}
+              value={formData.employmentStatus || undefined}
               onValueChange={(value) =>
                 setFormData({ ...formData, employmentStatus: value })
               }
@@ -79,12 +218,12 @@ export function CareerDetailsTab() {
                 <SelectValue placeholder="Select employment status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="employed">Employed</SelectItem>
-                <SelectItem value="unemployed">Unemployed</SelectItem>
-                <SelectItem value="self-employed">Self Employed</SelectItem>
-                <SelectItem value="freelance">Freelance</SelectItem>
-                <SelectItem value="student">Student</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value="EMPLOYED">Employed</SelectItem>
+                <SelectItem value="UNEMPLOYED">Unemployed</SelectItem>
+                <SelectItem value="SELF_EMPLOYED">Self Employed</SelectItem>
+                <SelectItem value="FREELANCE">Freelance</SelectItem>
+                <SelectItem value="STUDENT">Student</SelectItem>
+                <SelectItem value="OTHER">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -118,7 +257,8 @@ export function CareerDetailsTab() {
               Highest Education <span className="text-red-500">*</span>
             </Label>
             <Select
-              value={formData.education}
+              key={`education-${selectKey}`}
+              value={formData.education || undefined}
               onValueChange={(value) =>
                 setFormData({ ...formData, education: value })
               }
@@ -128,13 +268,14 @@ export function CareerDetailsTab() {
                 <SelectValue placeholder="Select education" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="high-school">High School</SelectItem>
-                <SelectItem value="diploma">Diploma</SelectItem>
-                <SelectItem value="bachelors">
+                <SelectItem value="HIGH_SCHOOL">High School</SelectItem>
+                <SelectItem value="DIPLOMA">Diploma</SelectItem>
+                <SelectItem value="BACHELORS">
                   Bachelor&apos;s Degree
                 </SelectItem>
-                <SelectItem value="masters">Master&apos;s Degree</SelectItem>
-                <SelectItem value="phd">PhD</SelectItem>
+                <SelectItem value="MASTERS">Master&apos;s Degree</SelectItem>
+                <SelectItem value="PHD">PhD</SelectItem>
+                <SelectItem value="OTHER">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -169,7 +310,8 @@ export function CareerDetailsTab() {
               Years of Experience <span className="text-red-500">*</span>
             </Label>
             <Select
-              value={formData.experience}
+              key={`experience-${selectKey}`}
+              value={formData.experience || undefined}
               onValueChange={(value) =>
                 setFormData({ ...formData, experience: value })
               }
@@ -189,7 +331,7 @@ export function CareerDetailsTab() {
                 <SelectItem value="7">7 Years</SelectItem>
                 <SelectItem value="8">8 Years</SelectItem>
                 <SelectItem value="9">9 Years</SelectItem>
-                <SelectItem value="10+">10+ Years</SelectItem>
+                <SelectItem value="10">10+ Years</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -214,6 +356,26 @@ export function CareerDetailsTab() {
           </div>
         </div>
 
+        {/* Notice Period */}
+        <div>
+          <Label
+            htmlFor="noticePeriod"
+            className="text-sm font-semibold text-primary"
+          >
+            Notice Period (Days)
+          </Label>
+          <Input
+            id="noticePeriod"
+            type="number"
+            value={formData.noticePeriod}
+            onChange={(e) =>
+              setFormData({ ...formData, noticePeriod: e.target.value })
+            }
+            placeholder="e.g., 30"
+            className="mt-1.5"
+          />
+        </div>
+
         {/* Skills Section */}
         <div>
           <Label className="text-sm font-semibold text-primary">Skills</Label>
@@ -223,9 +385,12 @@ export function CareerDetailsTab() {
               onChange={(e) => setCurrentSkill(e.target.value)}
               placeholder="Add a skill"
               className="flex-1"
-              onKeyPress={(e) =>
-                e.key === "Enter" && (e.preventDefault(), handleAddSkill())
-              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddSkill();
+                }
+              }}
             />
             <Button
               type="button"
@@ -249,10 +414,15 @@ export function CareerDetailsTab() {
                 </button>
               </Badge>
             ))}
+            {skills.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No skills added yet. Add your skills above.
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Resume and Portfolio */}
+        {/* Resume and Portfolio - Updated Resume Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label
@@ -261,20 +431,82 @@ export function CareerDetailsTab() {
             >
               Resume/CV
             </Label>
-            <Input
-              id="resume"
-              type="file"
-              accept=".pdf,.doc,.docx"
-              className="mt-1.5"
-              onChange={(e) => {
-                if (e.target.files?.[0]) {
-                  toast.success("Resume uploaded successfully");
-                }
-              }}
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Upload PDF, DOC, or DOCX (Max 5MB)
-            </p>
+
+            {/* Show resume file if exists */}
+            {resumeUrl ? (
+              <div className="mt-1.5 p-3 border rounded-md bg-gray-50 dark:bg-gray-900">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {getFileIcon(resumeUrl)}
+                    <a
+                      href={resumeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline truncate flex items-center gap-1"
+                      title={`${getUserFullName()}_CV.pdf`}
+                    >
+                      {`${getUserFullName()}_CV.pdf`}
+                      <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // Trigger file input click to change resume
+                        document.getElementById("resume-upload")?.click();
+                      }}
+                      className="ml-2"
+                      disabled={isUploading}
+                    >
+                      <Upload className="h-3 w-3 mr-1" />
+                      Change
+                    </Button>
+                    {/* Hidden file input - only visible when Change button is clicked */}
+                    <Input
+                      id="resume-upload"
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      className="hidden" // Hide the input
+                      onChange={handleResumeUpload}
+                      disabled={isUploading}
+                    />
+                  </div>
+                </div>
+                {isUploading && (
+                  <div className="text-sm text-muted-foreground mt-1">
+                    Uploading...
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  Click the filename to view in new tab
+                </p>
+              </div>
+            ) : (
+              /* File upload input when no resume exists */
+              <div className="mt-1.5">
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="resume-upload"
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="flex-1"
+                    onChange={handleResumeUpload}
+                    disabled={isUploading}
+                  />
+                  {isUploading && (
+                    <div className="text-sm text-muted-foreground">
+                      Uploading...
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Upload PDF, DOC, or DOCX (Max 5MB)
+                </p>
+              </div>
+            )}
           </div>
 
           <div>
@@ -318,7 +550,11 @@ export function CareerDetailsTab() {
       </div>
 
       <div className="flex justify-end pt-4">
-        <Button type="submit" disabled={isLoading} className="px-8 cursor-pointer">
+        <Button
+          type="submit"
+          disabled={isLoading || isUploading}
+          className="px-8 cursor-pointer"
+        >
           {isLoading ? "Saving..." : "Save Changes"}
         </Button>
       </div>
