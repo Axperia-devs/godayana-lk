@@ -22,6 +22,7 @@
         <spring-cloud.version>2023.0.0</spring-cloud.version>
         <jjwt.version>0.12.3</jjwt.version>
         <lombok.version>1.18.30</lombok.version>
+        <aws-java-sdk.version>2.45.1</aws-java-sdk.version>
     </properties>
 
     <modules>
@@ -35,6 +36,8 @@
         <module>services/otp-service</module>
         <module>services/user-service</module>
         <!--<module>services/notification-service</module>-->
+        <module>services/job-service</module>
+        <module>services/file-service</module>
     </modules>
 
     <dependencyManagement>
@@ -65,6 +68,15 @@
                 <groupId>me.paulschwarz</groupId>
                 <artifactId>spring-dotenv</artifactId>
                 <version>4.0.0</version>
+            </dependency>
+
+            <!-- AWS SDK BOM -->
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${aws-java-sdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

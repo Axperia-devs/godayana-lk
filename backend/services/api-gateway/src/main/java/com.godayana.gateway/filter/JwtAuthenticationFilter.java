@@ -36,6 +36,25 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/api/v1/stories/public"
     );
 
+    // Admin only endpoints
+    private static final List<String> ADMIN_ENDPOINTS = List.of(
+            "/api/v1/admin/**",
+            "/api/v1/jobs/pending",
+            "/api/v1/jobs/*/approve",
+            "/api/v1/jobs/*/reject",
+            "/api/v1/users/admin/**"
+    );
+
+    // Company only endpoints
+    private static final List<String> COMPANY_ENDPOINTS = List.of(
+            "/api/v1/jobs",
+            "/api/v1/jobs/*",
+            "/api/v1/jobs/*/close",
+            "/api/v1/jobs/*/delete",
+            "/api/v1/jobs/company",
+            "/api/v1/applications/job/*"
+    );
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
@@ -58,6 +77,13 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         String token = authHeader.substring(7);
 
+        // Check if token is blacklisted (revoked)
+//        if (tokenBlacklistService.isTokenBlacklisted(token)) {
+//            log.warn("Blacklisted token used for path: {}", path);
+//            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+//            return exchange.getResponse().setComplete();
+//        }
+
         // Validate token
         if (!jwtUtil.validateToken(token)) {
             log.warn("Invalid or expired token for path: {}", path);
@@ -69,6 +95,13 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String userId = jwtUtil.extractUserId(token);
         String userRole = jwtUtil.extractRole(token);
         String userEmail = jwtUtil.extractEmail(token);
+
+        // Check role-based access
+        if (!hasPermission(path, userRole)) {
+            log.warn("Access denied: User {} with role {} tried to access {}", userId, userRole, path);
+            exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+            return exchange.getResponse().setComplete();
+        }
 
         log.debug("Authenticated request - User: {}, Role: {}, Path: {}", userId, userRole, path);
 
@@ -84,6 +117,43 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private boolean isPublicEndpoint(String path) {
         return PUBLIC_ENDPOINTS.stream().anyMatch(path::startsWith);
+    }
+
+    private boolean hasPermission(String path, String role) {
+        // DEV has all permissions
+        if ("DEV".equals(role)) {
+            return true;
+        }
+
+        // Admin can access admin endpoints
+        if ("ADMIN".equals(role)) {
+            if (ADMIN_ENDPOINTS.stream().anyMatch(path::matches)) {
+                return true;
+            }
+            // Admin can also access company and seeker endpoints
+            return !path.startsWith("/api/v1/admin/");
+        }
+
+        // Company permissions
+        if ("COMPANY".equals(role)) {
+            if (COMPANY_ENDPOINTS.stream().anyMatch(path::matches)) {
+                return true;
+            }
+            // Company can also access job list
+            return !path.startsWith("/api/v1/admin/") &&
+                    !path.startsWith("/api/v1/seeker/");
+        }
+
+        // Seeker permissions (most restricted)
+        if ("SEEKER".equals(role)) {
+            // Seeker can access seeker endpoints and view jobs
+            return !path.startsWith("/api/v1/admin/") &&
+                    !path.startsWith("/api/v1/company/") &&
+                    !path.startsWith("/api/v1/jobs") || path.startsWith("/api/v1/jobs?") ||
+                    path.startsWith("/api/v1/applications");
+        }
+
+        return false;
     }
 
     @Override

@@ -49,7 +49,7 @@ INSERT INTO users (id, email, phone, password_hash, role, is_active)
 VALUES (
     '11111111-1111-1111-1111-111111111111',
     'dev@godayana.lk',
-    '+94770000000',
+    '+94123456789',
     '$2a$12$NZXFWQ7oaIvLDs42E856M.WUVI3koKxPWElxwmiVJJ0nQ3utAW2IO', -- password: Dev@123
     'DEV',
     true
@@ -70,8 +70,8 @@ VALUES (
 INSERT INTO users (id, email, phone, password_hash, role, is_active)
 VALUES (
     '33333333-3333-3333-3333-333333333333',
-    'seeker@godayana.lk',
-    '+94772222222',
+    '',
+    '+94000000000',
     '$2a$12$TfYbfVjSRLr4COaREMndN.5/7VF5AFcOaNiiTZwlCu9/wyECecQJG', -- password: Seeker@123
     'SEEKER',
     true

@@ -180,6 +180,35 @@ services:
       #  condition: service_started
     restart: unless-stopped
 
+file-service:
+  build:
+    context: .
+    dockerfile: services/file-service/Dockerfile
+  container_name: godayana-file-service
+  environment:
+    - DATABASE_URL=jdbc:postgresql://postgres-file:5432/file_db
+    - DATABASE_USERNAME=postgres
+    - DATABASE_PASSWORD=password
+    - STORAGE_BUCKET_NAME=${STORAGE_BUCKET_NAME}
+    - STORAGE_ACCESS_KEY=${STORAGE_ACCESS_KEY}
+    - STORAGE_SECRET_KEY=${STORAGE_SECRET_KEY}
+    - STORAGE_ENDPOINT=${STORAGE_ENDPOINT}
+  ports:
+    - "8084:8084"
+  depends_on:
+    - postgres-file
+
+postgres-file:
+  image: postgres:15
+  environment:
+    - POSTGRES_DB=file_db
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=password
+  ports:
+    - "5433:5432"
+  volumes:
+    - ./docker/postgres-file/init.sql:/docker-entrypoint-initdb.d/init.sql
+
   api-gateway:
     build:
       context: .
