@@ -40,6 +40,10 @@ file:
   service:
     url: ${FILE_SERVICE_URL:http://localhost:8084}
 
+user:
+  service:
+    url: ${USER_SERVICE_URL:http://localhost:8082}
+
 logging:
   level:
     com.godayana: DEBUG
