@@ -2,14 +2,14 @@
 export interface User {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   phone: string;
   role: "seeker" | "company" | "admin" | "dev";
   avatar?: string;
 }
 
 export interface LoginCredentials {
-  identifier: string;
+  username: string;
   password: string;
 }
 

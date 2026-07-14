@@ -1180,10 +1180,9 @@ export default function JobsPage() {
                         transition: { duration: 0.2 },
                       }}
                     >
-                      <Card className="hover:shadow-lg transition-all duration-300">
+                      {/* <Card className="hover:shadow-lg transition-all duration-300">
                         <CardContent className="p-6 py-2">
                           <div className="flex flex-col md:flex-row gap-4">
-                            {/* Company Logo Placeholder */}
                             <motion.div
                               whileHover={{ rotate: 5, scale: 1.1 }}
                               transition={{ duration: 0.2 }}
@@ -1192,7 +1191,6 @@ export default function JobsPage() {
                               <Briefcase className="h-8 w-8 text-primary" />
                             </motion.div>
 
-                            {/* Job Details */}
                             <div className="flex-1">
                               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
                                 <h3 className="text-xl font-bold hover:text-primary transition-colors">
@@ -1243,9 +1241,7 @@ export default function JobsPage() {
                                 </div>
                               </div>
 
-                              {/* Action Buttons Section */}
                               <div className="flex sm:flex-row gap-3 items-stretch md:items-end justify-end pt-4">
-                                {/* Bookmark/Save Button */}
                                 <motion.div
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
@@ -1262,7 +1258,6 @@ export default function JobsPage() {
                                   </Button>
                                 </motion.div>
 
-                                {/* Apply Button - Right on md+, full width on mobile */}
                                 <motion.div
                                   className="flex-1 md:flex-initial"
                                   whileHover={{ scale: 1.05 }}
@@ -1278,6 +1273,155 @@ export default function JobsPage() {
                                     </Button>
                                   </Link>
                                 </motion.div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card> */}
+                      <Card className="hover:shadow-lg transition-all duration-300 p-0">
+                        <CardContent className="px-4 pt-4 pb-2">
+                          <div className="flex flex-col gap-4">
+                            {/* Company Logo Placeholder */}
+                            <div className="flex gap-4">
+                              <motion.div
+                                whileHover={{ rotate: 5, scale: 1.1 }}
+                                transition={{ duration: 0.2 }}
+                                className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"
+                              >
+                                <Briefcase className="h-8 w-8 text-primary" />
+                              </motion.div>
+                              <div className="flex-1">
+                                <h3 className="text-xl font-bold hover:text-primary transition-colors">
+                                  <Link href={`/jobs/${job.id}`}>
+                                    {job.title}
+                                  </Link>
+                                </h3>
+                                <p className="text-muted-foreground">
+                                  {job.company}
+                                </p>
+                              </div>
+                              <div className="hidden md:flex flex-col items-end">
+                              {job.isOverseas && (
+                                <motion.div
+                                  initial={{ scale: 0.8, opacity: 0 }}
+                                  animate={{ scale: 1, opacity: 1 }}
+                                  transition={{ delay: 0.2 }}
+                                >
+                                  <Badge
+                                    variant="secondary"
+                                    className="bg-secondary/20 text-secondary-foreground border-secondary/30 w-fit"
+                                  >
+                                    Overseas
+                                  </Badge>
+                                </motion.div>
+                              )}
+                              <div className="items-center gap-2 text-lg font-semibold text-primary hidden md:flex">
+                                <DollarSign className="h-6 w-6 text-primary shrink-0" />
+                                <span>{job.salary}</span>
+                              </div>
+                              </div>
+                            </div>
+
+                            {/* Job Details */}
+                            <div className="flex-1">
+                              {/* Title and Company Row */}
+                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-0">
+                                {/* <div className="flex-1">
+                                  <h3 className="text-xl font-bold hover:text-primary transition-colors">
+                                    <Link href={`/jobs/${job.id}`}>
+                                      {job.title}
+                                    </Link>
+                                  </h3>
+                                  <p className="text-muted-foreground">
+                                    {job.company}
+                                  </p>
+                                </div> */}
+
+                                {/* Salary - Bigger on md+ */}
+                                <div className="flex flex-col items-center gap-2 md:gap-3 md:self-start md:hidden">
+                                  {job.isOverseas && (
+                                    <motion.div
+                                      initial={{ scale: 0.8, opacity: 0 }}
+                                      animate={{ scale: 1, opacity: 1 }}
+                                      transition={{ delay: 0.2 }}
+                                    >
+                                      <Badge
+                                        variant="secondary"
+                                        className="bg-secondary/20 text-secondary-foreground border-secondary/30 w-fit"
+                                      >
+                                        Overseas
+                                      </Badge>
+                                    </motion.div>
+                                  )}
+                                  <div className="flex items-center gap-2 text-lg font-semibold text-primary">
+                                    <DollarSign className="h-6 w-6 text-primary shrink-0" />
+                                    <span>{job.salary}</span>
+                                  </div>
+
+                                </div>
+                              </div>
+
+                              {/* Job Details Grid */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+                                <div className="flex items-center gap-2 text-sm">
+                                  <MapPin className="h-4 w-4 text-primary shrink-0" />
+                                  <span>{job.location}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Briefcase className="h-4 w-4 text-primary shrink-0" />
+                                  <span>{job.type}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Briefcase className="h-4 w-4 text-primary shrink-0" />
+                                  <span>{job.category}</span>
+                                </div>
+                              </div>
+
+                              {/* Action Buttons - Row with Details */}
+                              <div className="flex flex-col md:flex-row flex-wrap items-center justify-between gap-3 pt-2 border-t">
+                                {/* Left side - Additional details can go here */}
+                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="h-4 w-4" />
+                                    {job.posted}
+                                  </span>
+                                </div>
+
+                                {/* Right side - Action Buttons */}
+                                <div className="flex items-center gap-3">
+                                  {/* Bookmark/Save Button */}
+                                  <motion.div
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                  >
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="cursor-pointer"
+                                      onClick={() => {
+                                        console.log("Saved job:", job.id);
+                                      }}
+                                    >
+                                      <Bookmark className="h-5 w-5" />
+                                    </Button>
+                                  </motion.div>
+
+                                  {/* Apply Button */}
+                                  <motion.div
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                  >
+                                    <Link
+                                      href={`/jobs/${job.id}`}
+                                      className="block"
+                                    >
+                                      <Button className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer px-6 group">
+                                        View & Apply
+                                        <ChevronRight className="h-4 w-4 ml-2 transition-transform group-hover:translate-x-1" />
+                                      </Button>
+                                    </Link>
+                                  </motion.div>
+                                </div>
                               </div>
                             </div>
                           </div>

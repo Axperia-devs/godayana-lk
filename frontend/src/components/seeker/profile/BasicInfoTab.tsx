@@ -1,7 +1,7 @@
 // src/components/seeker/profile/BasicInfoTab.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,42 +13,152 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Camera, Upload } from "lucide-react";
-import { useAuth } from "@/lib/hooks/useAuth";
+import { Camera } from "lucide-react";
+import { seekerAPI, SeekerProfileData } from "@/lib/api/endpoints/seekerEndpoints";
 import toast from "react-hot-toast";
+import { fetchCurrentUser } from "@/lib/redux/actions/authActions";
+import { useAppDispatch } from "@/lib/redux/store";
+import { User } from "@/lib/api/endpoints/authEndpoints";
+import { setUser } from "@/lib/redux/slices/authSlice";
 
-export function BasicInfoTab() {
-  const { user } = useAuth();
+interface BasicInfoTabProps {
+  userData: SeekerProfileData | null;
+  onSaveComplete?: (message?: string) => void;
+}
+
+export function BasicInfoTab({ userData, onSaveComplete }: BasicInfoTabProps) {
+  const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: user?.name || "",
-    mobileNumber: user?.phone || "",
-    email: user?.email || "",
+    fullName: "",
     dateOfBirth: "",
     nationality: "",
     gender: "",
     location: "",
   });
+  const [selectKey, setSelectKey] = useState(0);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Populate form data when userData changes
+  useEffect(() => {
+    if (userData) {
+      setFormData({
+        fullName: userData.fullName || "",
+        dateOfBirth: userData.dateOfBirth || "",
+        nationality: userData.nationality || "",
+        gender: userData.gender || "",
+        location: userData.location || "",
+      });
+      setSelectKey((prev) => prev + 1);
+    }
+  }, [userData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // API call to save data
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast.success("Profile updated successfully");
-    setIsLoading(false);
+    const loadingToast = toast.loading("Updating profile...");
+
+    try {
+      const updateData = {
+        ...userData,
+        ...formData,
+      };
+
+      const response = await seekerAPI.updateSeekerProfile(updateData);
+      const apiResponse = response.data;
+
+      
+      if (apiResponse.success && apiResponse.data) {
+        const isDeferent = apiResponse.data.fullName != userData?.fullName;
+
+        if (isDeferent) {
+          const mappedUser: User = {
+            id: apiResponse.data.id!,
+            name: apiResponse.data.fullName!,
+            email: apiResponse.data.email!,
+            phone: apiResponse.data.phone!,
+            role: "seeker",
+            avatar: apiResponse.data.profilePicUrl,
+          };
+    
+          dispatch(setUser(mappedUser));
+        }
+      }
+
+      toast.dismiss(loadingToast);
+      if (onSaveComplete) {
+        await onSaveComplete("Basic information updated successfully");
+      } else {
+        toast.success("Basic details updated successfully");
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error("Failed to update profile");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error("Image size should be less than 2MB");
-        return;
-      }
-      // Handle image upload
-      toast.success("Photo uploaded successfully");
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image size should be less than 2MB");
+      return;
     }
+
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Please upload a JPEG or PNG image");
+      return;
+    }
+
+    setUploadingImage(true);
+    const loadingToast = toast.loading("Uploading photo...");
+
+    try {
+      const response = await seekerAPI.uploadProfileImage(file);
+      const apiResponse = response.data;
+      toast.dismiss(loadingToast);
+      // toast.success("Photo uploaded successfully");
+
+      if (apiResponse.data && apiResponse.success) {
+        // Refresh user data
+        if (onSaveComplete) {
+          await onSaveComplete("Photo updated successfully");
+        }
+
+        const mappedUser: User = {
+          id: apiResponse.data.id!,
+          name: apiResponse.data.fullName!,
+          email: apiResponse.data.email!,
+          phone: apiResponse.data.phone!,
+          role: "seeker",
+          avatar: apiResponse.data.profilePicUrl,
+        };
+
+        dispatch(setUser(mappedUser));
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error("Failed to upload photo");
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const getInitials = () => {
+    if (formData.fullName) {
+      return formData.fullName.charAt(0).toUpperCase();
+    }
+    return "U";
   };
 
   return (
@@ -58,30 +168,34 @@ export function BasicInfoTab() {
       {/* Upload Photo Section */}
       <div className="flex flex-col items-center space-y-4 pb-6 border-b">
         <div className="relative">
-          <Avatar className="w-24 h-24">
-            <AvatarImage src={user?.avatar} />
+          <Avatar className="w-24 h-24 ring-2 ring-primary/10">
+            <AvatarImage src={userData?.profilePicUrl} />
             <AvatarFallback className="text-2xl bg-primary/10 text-primary">
-              {formData.fullName?.charAt(0)?.toUpperCase() || "U"}
+              {getInitials()}
             </AvatarFallback>
           </Avatar>
           <label
             htmlFor="photo-upload"
-            className="absolute -bottom-2 -right-2 p-1.5 bg-primary rounded-full cursor-pointer hover:bg-primary/90 transition-colors"
+            className={`absolute -bottom-2 -right-2 p-1.5 bg-primary rounded-full cursor-pointer hover:bg-primary/90 transition-colors shadow-lg ${
+              uploadingImage ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             <Camera className="h-4 w-4 text-white" />
             <input
+              ref={fileInputRef}
               id="photo-upload"
               type="file"
               accept="image/*"
               className="hidden"
               onChange={handleImageUpload}
+              disabled={uploadingImage}
             />
           </label>
         </div>
         <p className="text-xs text-muted-foreground text-center">
-          Upload Photo
-          <br />
-          (If not in PNG, Make sure 2MB)
+          {uploadingImage
+            ? "Uploading..."
+            : "Upload Photo (Max 2MB, PNG or JPG)"}
         </p>
       </div>
 
@@ -106,41 +220,21 @@ export function BasicInfoTab() {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div>
             <Label
               htmlFor="mobileNumber"
               className="text-sm font-semibold text-primary"
             >
-              Mobile Number <span className="text-red-500">*</span>
+              Mobile Number{" "}
+              <span className="text-red-500 text-xs">(Username)</span>
             </Label>
             <Input
               id="mobileNumber"
-              value={formData.mobileNumber}
-              onChange={(e) =>
-                setFormData({ ...formData, mobileNumber: e.target.value })
-              }
+              value={userData?.phone || ""}
               placeholder="+94 77 123 4567"
-              required
-              className="mt-1.5"
-            />
-          </div>
-
-          <div>
-            <Label
-              htmlFor="email"
-              className="text-sm font-semibold text-primary"
-            >
-              Email Address
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              placeholder="john.doe@example.com"
+              readOnly
+              disabled
               className="mt-1.5"
             />
           </div>
@@ -191,7 +285,8 @@ export function BasicInfoTab() {
               Gender
             </Label>
             <Select
-              value={formData.gender}
+              key={`gender-${selectKey}`}
+              value={formData.gender || undefined}
               onValueChange={(value) =>
                 setFormData({ ...formData, gender: value })
               }
@@ -200,9 +295,9 @@ export function BasicInfoTab() {
                 <SelectValue placeholder="Select Gender" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value="MALE">Male</SelectItem>
+                <SelectItem value="FEMALE">Female</SelectItem>
+                <SelectItem value="OTHER">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -215,7 +310,8 @@ export function BasicInfoTab() {
               Nationality <span className="text-red-500">*</span>
             </Label>
             <Select
-              value={formData.nationality}
+              key={`nationality-${selectKey}`}
+              value={formData.nationality || undefined}
               onValueChange={(value) =>
                 setFormData({ ...formData, nationality: value })
               }
@@ -224,9 +320,8 @@ export function BasicInfoTab() {
                 <SelectValue placeholder="Select Nationality" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="sri-lankan">Sri Lankan</SelectItem>
-                <SelectItem value="indian">Indian</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value="SRI_LANKAN">Sri Lankan</SelectItem>
+                <SelectItem value="OTHER">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -234,7 +329,11 @@ export function BasicInfoTab() {
       </div>
 
       <div className="flex justify-end pt-4">
-        <Button type="submit" disabled={isLoading} className="px-8 cursor-pointer">
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="px-8 cursor-pointer"
+        >
           {isLoading ? "Saving..." : "Save Changes"}
         </Button>
       </div>

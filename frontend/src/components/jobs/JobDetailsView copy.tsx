@@ -315,8 +315,46 @@ export function JobDetailsView({
 
         {/* SIDEBAR */}
         <div className="lg:col-span-1 -top-16 md:-top-44 relative order-first lg:order-last hidden md:block">
+          <div className="overflow-visible md:sticky md:top-22 z-12 pb-2">
+            <div className="">
+              <div className="flex w-full gap-3 justify-between items-center px-2">
+                <Button
+                  onClick={handleApply}
+                  className="px-6 bg-primary hover:bg-primary/80 cursor-pointer text-white font-semibold"
+                  size="lg"
+                >
+                  APPLY FOR JOB
+                </Button>
+
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    onClick={handleSave}
+                    className="text-white h-8 w-8 cursor-pointer bg-primary rounded-full"
+                  >
+                    {saved ? (
+                      <BookmarkCheck size={16} className="text-primary cup" />
+                    ) : (
+                      <Bookmark size={16} />
+                    )}
+                    {/* {saved ? "Saved" : "Save Job"} */}
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    onClick={handleShare}
+                    className="text-white h-8 w-8 cursor-pointer bg-primary rounded-full"
+                  >
+                    <Share2 size={16} />
+                    {/* Share */}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* MAIN APPLICATION CARD */}
-          <div className="bg-card shadow-xl rounded-t-xl overflow-visible relative top-24 pb-40 border">
+          <div className="bg-card shadow-xl rounded-t-xl overflow-visible relative top-14 pb-22 border">
             <div className="px-6 py-2 space-y-4">
               {/* LOGO + TITLE */}
               <div className="w-30 h-30 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center text-white font-bold text-xl absolute -top-10 shadow-xl z-10">
@@ -325,8 +363,8 @@ export function JobDetailsView({
             </div>
           </div>
 
-          <div className="bg-card border-l border-r relative md:sticky md:top-18 z-1 py-2">
-            <div className="px-6 py-2 space-y-4">
+          <div className="bg-card border-l border-r border-b rounded-b-md relative md:sticky md:top-20 z-1 pt-12 pb-2">
+            <div className="px-6 pt-2 space-y-4">
               <div className="pb-2 border-b">
                 <h3 className="font-bold text-lg">{job.title}</h3>
                 <p className="text-sm text-muted-foreground">
@@ -336,8 +374,8 @@ export function JobDetailsView({
             </div>
           </div>
 
-          <div className="bg-card relative shadow-xl overflow-visible border-l border-r">
-            <div className="px-6 py-2 space-y-4">
+          <div className="bg-card relative shadow-xl overflow-visible border-l border-r border-b rounded-b-md">
+            <div className="px-6 pb-2 pt-4 space-y-4">
               {/* META INFO */}
               <div className="text-sm space-y-2 text-muted-foreground">
                 <div className="flex items-center gap-2">
@@ -356,34 +394,37 @@ export function JobDetailsView({
 
               {/* QUICK OVERVIEW */}
               <div className="border-t pt-3">
-                <table className="w-full text-sm">
-                  <tbody>
-                    <tr className="align-top">
-                      <td className="text-muted-foreground w-24 py-1">
-                        Education
-                      </td>
-                      <td className="font-medium py-1">
-                        {job.qualifications?.education || "Any"}
-                      </td>
-                    </tr>
-                    <tr className="align-top">
-                      <td className="text-muted-foreground w-24 py-1">
-                        Experience
-                      </td>
-                      <td className="font-medium py-1">
-                        {job.qualifications?.experience || "Any"}
-                      </td>
-                    </tr>
-                    <tr className="align-top">
-                      <td className="text-muted-foreground w-24 py-1">
-                        Salary
-                      </td>
-                      <td className="font-medium py-1 text-primary">
-                        {job.qualifications?.salaryRange || "Negotiable"}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div className="space-y-4 text-sm">
+                  {/* Education Row */}
+                  <div className="flex flex-col gap-1">
+                    <div className="text-muted-foreground w-24 text-xs">
+                      Education
+                    </div>
+                    <div className="font-medium flex-1">
+                      {job.qualifications?.education || "Any"}
+                    </div>
+                  </div>
+
+                  {/* Experience Row */}
+                  <div className="flex flex-col gap-1">
+                    <div className="text-muted-foreground w-24 text-xs">
+                      Experience
+                    </div>
+                    <div className="font-medium flex-1">
+                      {job.qualifications?.experience || "Any"}
+                    </div>
+                  </div>
+
+                  {/* Salary Row */}
+                  <div className="flex flex-col gap-1">
+                    <div className="text-muted-foreground w-24 text-xs">
+                      Salary
+                    </div>
+                    <div className="font-medium flex-1 text-primary">
+                      {job.qualifications?.salaryRange || "Negotiable"}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* STATS */}
@@ -402,10 +443,9 @@ export function JobDetailsView({
             </div>
           </div>
 
-          <div className="bg-card rounded-b-xl shadow-xl overflow-visible md:sticky md:top-40 z-12 border-l border-r border-b pb-2">
+          <div className="md:hidden bg-card rounded-b-xl shadow-xl overflow-visible md:sticky md:top-40 z-12 border-l border-r border-b pb-2">
             <div className="px-6 py-2 space-y-4">
               <div className="space-y-3">
-                {/* ACTION BUTTONS */}
                 <Button
                   onClick={handleApply}
                   className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-semibold"

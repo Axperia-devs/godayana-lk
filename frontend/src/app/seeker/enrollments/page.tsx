@@ -355,7 +355,7 @@ export default function SeekerEnrollments() {
                       </div>
 
                       {/* Progress Section */}
-                      <div className="mt-4">
+                      {/* <div className="mt-4">
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm font-medium">Progress</span>
                           <span className="text-sm font-semibold text-primary">
@@ -363,7 +363,7 @@ export default function SeekerEnrollments() {
                           </span>
                         </div>
                         <Progress value={enrollment.progress} className="h-2" />
-                      </div>
+                      </div> */}
 
                       {/* Meta Info */}
                       <div className="flex flex-wrap gap-4 mt-4 text-sm text-muted-foreground">
@@ -371,12 +371,12 @@ export default function SeekerEnrollments() {
                           <Calendar size={14} />{" "}
                           {formatDate(enrollment.enrolledDate)}
                         </span>
-                        {enrollment.nextStep && (
+                        {/* {enrollment.nextStep && (
                           <span className="flex items-center gap-1 text-primary">
                             <ChevronRight size={14} />
                             Next: {enrollment.nextStep}
                           </span>
-                        )}
+                        )} */}
                       </div>
                     </div>
 

@@ -1,4 +1,4 @@
-// src/app/company/courses/page.tsx
+// src/app/company/jobs/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -14,8 +14,7 @@ import {
   Users,
   BarChart3,
   MapPin,
-  Clock,
-  DollarSign,
+  Briefcase,
 } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -30,102 +29,78 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-interface Course {
+interface Job {
   id: number;
   title: string;
-  category: string;
-  enrollType: "online" | "physical";
-  location?: string;
+  location: string;
+  type: "local" | "overseas";
   status: "active" | "closed" | "draft";
-  enrolledStudents: number;
+  applications: number;
   views: number;
   postedDate: string;
-  price: string;
-  startDate: string;
-  endDate: string;
   company: string;
 }
 
 // Mock data - replace with API call
-const allCourses: Course[] = [
+const allJobs: Job[] = [
   {
     id: 1,
-    title: "Advanced Web Development Bootcamp",
-    category: "programming",
-    enrollType: "physical",
-    location: "Colombo, Sri Lanka",
+    title: "Senior Software Engineer",
+    company: "Tech Corp",
+    location: "Colombo",
+    type: "local",
     status: "active",
-    enrolledStudents: 45,
+    applications: 45,
     views: 320,
     postedDate: "2024-04-20",
-    price: "45000",
-    startDate: "2025-01-15",
-    endDate: "2025-03-15",
-    company: "Tech Academy",
   },
   {
     id: 2,
-    title: "Digital Marketing Masterclass",
-    category: "marketing",
-    enrollType: "online",
-    location: "",
-    status: "active",
-    enrolledStudents: 128,
-    views: 510,
-    postedDate: "2024-04-15",
-    price: "25000",
-    startDate: "2025-02-01",
-    endDate: "2025-03-01",
+    title: "Digital Marketing Manager",
     company: "Creative Agency",
+    location: "Kandy",
+    type: "local",
+    status: "active",
+    applications: 28,
+    views: 210,
+    postedDate: "2024-04-15",
   },
   {
     id: 3,
-    title: "Data Science & AI Fundamentals",
-    category: "data",
-    enrollType: "online",
-    location: "",
+    title: "Construction Worker",
+    company: "Build Masters",
+    location: "Dubai UAE",
+    type: "overseas",
     status: "active",
-    enrolledStudents: 89,
-    views: 430,
+    applications: 52,
+    views: 410,
     postedDate: "2024-04-18",
-    price: "55000",
-    startDate: "2025-01-20",
-    endDate: "2025-04-20",
-    company: "Data Institute",
   },
   {
     id: 4,
-    title: "UI/UX Design Course",
-    category: "design",
-    enrollType: "physical",
-    location: "Kandy, Sri Lanka",
+    title: "Sales Executive",
+    company: "Sales Hub",
+    location: "Colombo",
+    type: "local",
     status: "closed",
-    enrolledStudents: 32,
-    views: 280,
+    applications: 55,
+    views: 180,
     postedDate: "2024-04-10",
-    price: "35000",
-    startDate: "2024-10-01",
-    endDate: "2024-12-15",
-    company: "Design Hub",
   },
   {
     id: 5,
-    title: "Business English Communication",
-    category: "language",
-    enrollType: "online",
-    location: "",
+    title: "Frontend Developer",
+    company: "WebTech",
+    location: "Remote",
+    type: "local",
     status: "draft",
-    enrolledStudents: 0,
+    applications: 0,
     views: 0,
     postedDate: "2024-04-22",
-    price: "15000",
-    startDate: "2025-03-01",
-    endDate: "2025-04-15",
-    company: "Language Center",
   },
 ];
 
-const getStatusConfig = (status: Course["status"]) => {
+const getStatusConfig = (status: Job["status"]) => {
   const config = {
     active: {
       label: "Active",
@@ -144,72 +119,52 @@ const getStatusConfig = (status: Course["status"]) => {
   return config[status];
 };
 
-const getEnrollTypeConfig = (type: Course["enrollType"]) => {
-  return {
-    online: {
-      label: "Online",
-      color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-    },
-    physical: {
-      label: "Physical",
-      color:
-        "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-    },
-  }[type];
-};
-
-export default function CompanyCourses() {
+export default function CompanyJobs() {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeFilter, setActiveFilter] = useState<
     "all" | "active" | "closed" | "draft"
   >("all");
-  const [courses, setCourses] = useState<Course[]>(allCourses);
-  const [deleteCourseId, setDeleteCourseId] = useState<number | null>(null);
+  const [jobs, setJobs] = useState<Job[]>(allJobs);
+  const [deleteJobId, setDeleteJobId] = useState<number | null>(null);
   const itemsPerPage = 10;
 
-  // Filter courses based on status
-  const getFilteredCourses = () => {
+  // Filter jobs based on status
+  const getFilteredJobs = () => {
     if (activeFilter === "active") {
-      return courses.filter((course) => course.status === "active");
+      return jobs.filter((job) => job.status === "active");
     }
     if (activeFilter === "closed") {
-      return courses.filter((course) => course.status === "closed");
+      return jobs.filter((job) => job.status === "closed");
     }
     if (activeFilter === "draft") {
-      return courses.filter((course) => course.status === "draft");
+      return jobs.filter((job) => job.status === "draft");
     }
-    return courses;
+    return jobs;
   };
 
-  const filteredCourses = getFilteredCourses();
-  const totalItems = filteredCourses.length;
+  const filteredJobs = getFilteredJobs();
+  const totalItems = filteredJobs.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentCourses = filteredCourses.slice(startIndex, endIndex);
+  const currentJobs = filteredJobs.slice(startIndex, endIndex);
 
   // Get counts for filters
-  const allCount = courses.length;
-  const activeCount = courses.filter(
-    (course) => course.status === "active",
-  ).length;
-  const closedCount = courses.filter(
-    (course) => course.status === "closed",
-  ).length;
-  const draftCount = courses.filter(
-    (course) => course.status === "draft",
-  ).length;
+  const allCount = jobs.length;
+  const activeCount = jobs.filter((job) => job.status === "active").length;
+  const closedCount = jobs.filter((job) => job.status === "closed").length;
+  const draftCount = jobs.filter((job) => job.status === "draft").length;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleDeleteCourse = () => {
-    if (deleteCourseId) {
-      setCourses(courses.filter((course) => course.id !== deleteCourseId));
-      toast.success("Course deleted successfully");
-      setDeleteCourseId(null);
+  const handleDeleteJob = () => {
+    if (deleteJobId) {
+      setJobs(jobs.filter((job) => job.id !== deleteJobId));
+      toast.success("Job deleted successfully");
+      setDeleteJobId(null);
     }
   };
 
@@ -225,12 +180,6 @@ export default function CompanyCourses() {
     return `Posted ${Math.floor(diffDays / 30)} months ago`;
   };
 
-  const formatPrice = (price: string) => {
-    const numPrice = parseInt(price);
-    if (numPrice === 0) return "Free";
-    return `LKR ${numPrice.toLocaleString()}`;
-  };
-
   return (
     <div className="space-y-6">
       <Card className="bg-primary/4 min-h-[calc(100vh-7rem)] flex flex-col">
@@ -238,7 +187,7 @@ export default function CompanyCourses() {
           {/* Header */}
           <div className="mb-6">
             <p className="text-sm text-muted-foreground mt-1">
-              View and manage all your course offerings
+              View and manage all your job postings
             </p>
           </div>
 
@@ -302,95 +251,70 @@ export default function CompanyCourses() {
               </button>
             </div>
             <div>
-              <Link href="/company/courses/create">
+              <Link href="/company/jobs/create">
                 <Button className="gap-2 cursor-pointer w-full lg:w-auto">
                   <Plus size={16} />
-                  Post a Course
+                  Post a Job
                 </Button>
               </Link>
             </div>
           </div>
 
-          {/* Courses List */}
+          {/* Jobs List */}
           <div className="flex-1 space-y-4">
-            {currentCourses.map((course) => {
-              const statusConfig = getStatusConfig(course.status);
-              const enrollTypeConfig = getEnrollTypeConfig(course.enrollType);
+            {currentJobs.map((job) => {
+              const statusConfig = getStatusConfig(job.status);
               return (
                 <div
-                  key={course.id}
+                  key={job.id}
                   className="p-4 border rounded-lg hover:shadow-md transition-shadow"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                     {/* Left Section */}
                     <div className="flex-1">
-                      <div className="flex items-start justify-between flex-wrap gap-2">
+                      <div className="flex items-start justify-between">
                         <div>
-                          <h3 className="font-semibold text-lg">
-                            {course.title}
-                          </h3>
+                          <h3 className="font-semibold text-lg">{job.title}</h3>
                           <p className="text-sm text-muted-foreground">
-                            {course.company}
+                            {job.company}
                           </p>
                         </div>
-                        <div className="flex gap-2">
-                          <Badge className={enrollTypeConfig.color}>
-                            {enrollTypeConfig.label}
-                          </Badge>
-                          <Badge className={statusConfig.color}>
-                            {statusConfig.label}
-                          </Badge>
-                        </div>
+                        <Badge className={statusConfig.color}>
+                          {statusConfig.label}
+                        </Badge>
                       </div>
 
-                      {/* Course Stats */}
+                      {/* Job Stats */}
                       <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <Users size={14} /> {course.enrolledStudents} enrolled
+                          <Users size={14} /> {job.applications} applications
                         </span>
                         <span className="flex items-center gap-1">
-                          <BarChart3 size={14} /> {course.views} views
+                          <BarChart3 size={14} /> {job.views} views
                         </span>
                         <span className="flex items-center gap-1">
-                          <Calendar size={14} /> {formatDate(course.postedDate)}
+                          <Calendar size={14} /> {formatDate(job.postedDate)}
                         </span>
                         <span className="flex items-center gap-1">
-                          <DollarSign size={14} /> {formatPrice(course.price)}
+                          <MapPin size={14} /> {job.location}
                         </span>
-                        {course.enrollType === "physical" &&
-                          course.location && (
-                            <span className="flex items-center gap-1">
-                              <MapPin size={14} /> {course.location}
-                            </span>
-                          )}
                         <span className="flex items-center gap-1">
-                          <Clock size={14} />
-                          {new Date(
-                            course.startDate,
-                          ).toLocaleDateString()} -{" "}
-                          {new Date(course.endDate).toLocaleDateString()}
+                          <Briefcase size={14} />{" "}
+                          {job.type === "local" ? "Local Job" : "Overseas Job"}
                         </span>
                       </div>
                     </div>
 
                     {/* Action Buttons */}
                     <div className="flex items-center gap-2">
-                      <Link href={`/company/courses/${course.id}`}>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1 cursor-pointer"
-                        >
+                      <Link href={`/company/jobs/${job.id}`}>
+                        <Button variant="outline" size="sm" className="gap-1 cursor-pointer">
                           <Eye size={14} />
                           View
                         </Button>
                       </Link>
-                      <Link href={`/company/courses/edit/${course.id}`}>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1 cursor-pointer"
-                        >
+                      <Link href={`/company/jobs/edit/${job.id}`}>
+                        <Button variant="outline" size="sm" className="gap-1 cursor-pointer">
                           <Edit size={14} />
                           Edit
                         </Button>
@@ -399,7 +323,7 @@ export default function CompanyCourses() {
                         variant="destructive"
                         size="sm"
                         className="gap-1 cursor-pointer"
-                        onClick={() => setDeleteCourseId(course.id)}
+                        onClick={() => setDeleteJobId(job.id)}
                       >
                         <Trash2 size={14} />
                         Delete
@@ -411,22 +335,22 @@ export default function CompanyCourses() {
             })}
 
             {/* Empty State */}
-            {currentCourses.length === 0 && (
+            {currentJobs.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">
                   {activeFilter === "draft"
-                    ? "No draft courses found. Create a new course."
+                    ? "No draft jobs found. Create a new job posting."
                     : activeFilter === "active"
-                      ? "No active courses found"
+                      ? "No active jobs found"
                       : activeFilter === "closed"
-                        ? "No closed courses found"
-                        : "No courses found. Click 'Post a Course' to create your first course."}
+                        ? "No closed jobs found"
+                        : "No jobs found. Click 'Post a Job' to create your first job posting."}
                 </p>
                 {activeFilter === "all" && (
-                  <Link href="/company/courses/post">
+                  <Link href="/company/jobs/post">
                     <Button className="mt-4 gap-2">
                       <Plus size={16} />
-                      Post Your First Course
+                      Post Your First Job
                     </Button>
                   </Link>
                 )}
@@ -498,14 +422,14 @@ export default function CompanyCourses() {
 
               <div className="text-center text-sm text-muted-foreground">
                 Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of{" "}
-                {totalItems} courses
+                {totalItems} jobs
               </div>
             </div>
           )}
 
           {totalPages <= 1 && totalItems > 0 && (
             <div className="text-center text-sm text-muted-foreground mt-8 pt-4 border-t">
-              Showing all {totalItems} courses
+              Showing all {totalItems} jobs
             </div>
           )}
         </CardContent>
@@ -513,24 +437,21 @@ export default function CompanyCourses() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog
-        open={!!deleteCourseId}
-        onOpenChange={() => setDeleteCourseId(null)}
+        open={!!deleteJobId}
+        onOpenChange={() => setDeleteJobId(null)}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete this
-              course and remove all associated data including student
-              enrollments.
+              job posting and remove all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="cursor-pointer">
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDeleteCourse}
+              onClick={handleDeleteJob}
               className="bg-red-600 hover:bg-red-700 cursor-pointer"
             >
               Delete

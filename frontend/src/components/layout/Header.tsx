@@ -533,7 +533,7 @@ export function Header() {
                             {user.email}
                           </p>
                           <span className="inline-block mt-1 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">
-                            {user.role === "seeker" ? "Job Seeker" : "Company"}
+                            {getRole()}
                           </span>
                         </div>
                       </div>

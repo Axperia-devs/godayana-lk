@@ -9,12 +9,7 @@ export function useAuth() {
   );
 
   const login = async (identifier: string, password: string) => {
-    try {
-      await dispatch(loginUser({ identifier, password })).unwrap();
-      return { success: true };
-    } catch (error) {
-      return { success: false, error };
-    }
+      await dispatch(loginUser({ username: identifier, password })).unwrap();
   };
 
   const logout = async () => {

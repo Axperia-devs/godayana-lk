@@ -59,7 +59,8 @@ const storiesData = [
     comments: 8,
     image: "/images/stories/priya.jpg",
     avatar: "/images/avatars/priya.jpg",
-    color: "from-emerald-500 to-emerald-700",
+    //color: "from-emerald-500 to-emerald-700",
+    color: "from-blue-500 to-blue-700",
   },
   {
     id: 3,
@@ -78,7 +79,8 @@ const storiesData = [
     comments: 23,
     image: "/images/stories/ayisha.jpg",
     avatar: "/images/avatars/ayisha.jpg",
-    color: "from-purple-500 to-purple-700",
+    //color: "from-purple-500 to-purple-700",
+    color: "from-blue-500 to-blue-700",
   },
   {
     id: 4,
@@ -97,7 +99,8 @@ const storiesData = [
     comments: 5,
     image: "/images/stories/nuwan.jpg",
     avatar: "/images/avatars/nuwan.jpg",
-    color: "from-amber-500 to-amber-700",
+    //color: "from-amber-500 to-amber-700",
+    color: "from-blue-500 to-blue-700",
   },
   {
     id: 5,
@@ -116,7 +119,8 @@ const storiesData = [
     comments: 11,
     image: "/images/stories/tharindu.jpg",
     avatar: "/images/avatars/tharindu.jpg",
-    color: "from-indigo-500 to-indigo-700",
+    // color: "from-indigo-500 to-indigo-700",
+    color: "from-blue-500 to-blue-700",
   },
   {
     id: 6,
@@ -135,7 +139,8 @@ const storiesData = [
     comments: 17,
     image: "/images/stories/dilini.jpg",
     avatar: "/images/avatars/dilini.jpg",
-    color: "from-rose-500 to-rose-700",
+    // color: "from-rose-500 to-rose-700",
+    color: "from-blue-500 to-blue-700",
   },
   {
     id: 7,
@@ -154,7 +159,8 @@ const storiesData = [
     comments: 9,
     image: "/images/stories/kasun.jpg",
     avatar: "/images/avatars/kasun.jpg",
-    color: "from-red-500 to-red-700",
+    // color: "from-red-500 to-red-700",
+    color: "from-blue-500 to-blue-700",
   },
   {
     id: 8,
@@ -173,7 +179,8 @@ const storiesData = [
     comments: 31,
     image: "/images/stories/chamari.jpg",
     avatar: "/images/avatars/chamari.jpg",
-    color: "from-green-500 to-green-700",
+    // color: "from-green-500 to-green-700",
+    color: "from-blue-500 to-blue-700",
   },
   {
     id: 9,
@@ -192,7 +199,8 @@ const storiesData = [
     comments: 6,
     image: "/images/stories/saman.jpg",
     avatar: "/images/avatars/saman.jpg",
-    color: "from-cyan-500 to-cyan-700",
+    // color: "from-cyan-500 to-cyan-700",
+    color: "from-blue-500 to-blue-700",
   },
   {
     id: 10,
@@ -211,7 +219,8 @@ const storiesData = [
     comments: 7,
     image: "/images/stories/nadeesha.jpg",
     avatar: "/images/avatars/nadeesha.jpg",
-    color: "from-pink-500 to-pink-700",
+    // color: "from-pink-500 to-pink-700",
+    color: "from-blue-500 to-blue-700",
   },
   {
     id: 11,
@@ -230,7 +239,8 @@ const storiesData = [
     comments: 14,
     image: "/images/stories/ravi.jpg",
     avatar: "/images/avatars/ravi.jpg",
-    color: "from-yellow-500 to-yellow-700",
+    // color: "from-yellow-500 to-yellow-700",
+    color: "from-blue-500 to-blue-700",
   },
   {
     id: 12,
@@ -249,7 +259,8 @@ const storiesData = [
     comments: 47,
     image: "/images/stories/kumari.jpg",
     avatar: "/images/avatars/kumari.jpg",
-    color: "from-teal-500 to-teal-700",
+    // color: "from-teal-500 to-teal-700",
+    color: "from-blue-500 to-blue-700",
   },
 ];
 
