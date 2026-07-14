@@ -75,6 +75,9 @@ export const metadata: Metadata = {
   // },
 };
 
+// This runs on the server and WILL show in Railway logs
+console.log('🔗 SERVER - NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+
 export default function RootLayout({
   children,
 }: {
@@ -87,7 +90,7 @@ export default function RootLayout({
   if (typeof window !== "undefined") {
     console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
   }
-  
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
